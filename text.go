@@ -20,8 +20,12 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 		return err
 	}
 
-	if t.Color != nil {
-		if err := setColor(pdf, t.Color); err != nil {
+	{
+		c := t.Color
+		if c == nil {
+			c = color.Black
+		}
+		if err := setColor(pdf, c); err != nil {
 			return err
 		}
 	}
