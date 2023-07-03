@@ -1,5 +1,7 @@
 package flexpdf
 
+import "github.com/signintech/gopdf"
+
 type FlexItem interface {
-	flexItem()
+	draw(*gopdf.GoPdf, rect) error
 }

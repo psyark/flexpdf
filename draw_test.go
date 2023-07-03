@@ -2,6 +2,7 @@ package flexpdf
 
 import (
 	_ "embed"
+	"image/color"
 	"os"
 	"testing"
 
@@ -27,9 +28,10 @@ func TestXxx(t *testing.T) {
 	}
 
 	box := &Box{
+		BackgroundColor: color.RGBA{R: 0xFF, A: 0x80},
 		Items: []FlexItem{
-			&Text{Text: "あいうえお"},
-			&Text{Text: "かきくけこ"},
+			&Text{Text: "あいうえお\nかきくけこさしすせそ\nたちつ", FontFamily: "ipaexg", FontSize: 20, LineHeight: 1.5},
+			&Text{Text: "abc", FontFamily: "ipaexm", FontSize: 30},
 		},
 	}
 

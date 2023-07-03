@@ -1,27 +1,28 @@
 package flexpdf
 
-type Direction int
+type Direction string
 
 const (
-	Row Direction = iota
-	Column
+	DirectionRow    Direction = "row"
+	DirectionColumn Direction = "column"
 )
 
-type JustifyContent int
+type JustifyContent string
 
 const (
-	JustifyContentFlexStart JustifyContent = iota
-	JustifyContentFlexEnd
-	JustifyContentCenter
-	JustifyContentSpaceBetween
-	JustifyContentSpaceAround
-	JustifyContentSpaceEvenly
+	JustifyContentFlexStart    JustifyContent = "flex-start"
+	JustifyContentFlexEnd      JustifyContent = "flex-end"
+	JustifyContentCenter       JustifyContent = "center"
+	JustifyContentSpaceBetween JustifyContent = "space-between"
+	JustifyContentSpaceAround  JustifyContent = "space-around"
+	JustifyContentSpaceEvenly  JustifyContent = "space-evenly"
 )
 
-type AlignItems int
+type AlignItems string
 
 const (
-	AlignItemsFlexStart AlignItems = iota
-	AlignItemsFlexEnd
-	AlignItemsCenter
+	AlignItemsFlexStart AlignItems = "flex-start"
+	AlignItemsFlexEnd   AlignItems = "flex-end"
+	AlignItemsCenter    AlignItems = "center"
+	AlignItemsStretch   AlignItems = "stretch"
 )
