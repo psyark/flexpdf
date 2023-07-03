@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 
+	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
 )
 
@@ -17,42 +18,72 @@ type Box struct {
 }
 
 func (b *Box) draw(pdf *gopdf.GoPdf, r rect) error {
-	if err := pdf.SetFont("ipaexg", "", 20); err != nil {
-		return err
-	}
-
 	// 背景色
-	if b.BackgroundColor != nil {
+	if b.BackgroundColor != nil && r.w != 0 && r.h != 0 {
 		if err := setColor(pdf, b.BackgroundColor); err != nil {
 			return err
 		}
 		if err := pdf.Rectangle(r.x, r.y, r.x+r.w, r.y+r.h, "F", 0, 0); err != nil {
-			return err
+			return errors.Wrap(err, "rectangle")
 		}
 	}
 
 	log.Printf("Direction=%q JustifyContent=%q AlignItems=%q\n", b.Direction, b.JustifyContent, b.AlignItems)
 
 	// 子孫
-	itemRect := rect{x: r.x, y: r.y}
-	for _, item := range b.Items {
+	itemRect := r
+	prefSizes := make([]*size, len(b.Items))
+	mainAxisRemains := r.getLength(b.Direction.mainAxis())
+	log.Println(mainAxisRemains)
+	for i, item := range b.Items {
 		ps, err := item.getPreferredSize(pdf)
 		if err != nil {
 			return err
 		}
+		prefSizes[i] = ps
+		mainAxisRemains -= ps.getLength(b.Direction.mainAxis())
+	}
 
-		log.Println(ps.w, ps.h)
+	if mainAxisRemains < 0 {
+		mainAxisRemains = 0
+	}
 
-		itemRect.w = ps.w
-		itemRect.h = ps.h
+	if b.Direction.mainAxis() == horizontal {
+		switch b.JustifyContent {
+		case JustifyContentFlexEnd:
+			itemRect.x += mainAxisRemains
+		case JustifyContentCenter:
+			itemRect.x += mainAxisRemains / 2
+		case JustifyContentSpaceAround:
+			itemRect.x += mainAxisRemains / float64(len(b.Items)*2)
+		}
+	} else {
+		// TODO
+	}
 
-		if err := item.draw(pdf, itemRect); err != nil {
-			return err
+	for i, item := range b.Items {
+		ps := prefSizes[i]
+
+		if b.Direction.mainAxis() == horizontal {
+			itemRect.w = ps.w
+		} else {
+			itemRect.h = ps.h
 		}
 
-		if isHorizontal(b.Direction) {
+		if err := item.draw(pdf, itemRect); err != nil {
+			return errors.Wrap(err, "item.draw")
+		}
+
+		if b.Direction.mainAxis() == horizontal {
 			itemRect.x += ps.w
+			switch b.JustifyContent {
+			case JustifyContentSpaceBetween:
+				itemRect.x += mainAxisRemains / float64(len(b.Items)-1)
+			case JustifyContentSpaceAround:
+				itemRect.x += mainAxisRemains / float64(len(b.Items))
+			}
 		} else {
+			// TODO
 			itemRect.y += ps.h
 		}
 	}
@@ -67,7 +98,7 @@ func (b *Box) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 		if err != nil {
 			return nil, err
 		}
-		if isHorizontal(b.Direction) {
+		if b.Direction.mainAxis() == horizontal {
 			ps.w += ips.w
 			ps.h = math.Max(ps.h, ips.h)
 		} else {

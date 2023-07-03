@@ -18,12 +18,12 @@ func (d Direction) String() string {
 	}
 }
 
-func isHorizontal(d Direction) bool {
+func (d Direction) mainAxis() axis {
 	switch d {
 	case DirectionRow:
-		return true
+		return horizontal
 	case DirectionColumn:
-		return false
+		return vertical
 	default:
 		panic(d)
 	}
@@ -38,7 +38,7 @@ const (
 	JustifyContentCenter       JustifyContent = "center"
 	JustifyContentSpaceBetween JustifyContent = "space-between"
 	JustifyContentSpaceAround  JustifyContent = "space-around"
-	JustifyContentSpaceEvenly  JustifyContent = "space-evenly"
+	// JustifyContentSpaceEvenly  JustifyContent = "space-evenly"
 )
 
 // https://www.w3.org/TR/css-flexbox/#propdef-align-items

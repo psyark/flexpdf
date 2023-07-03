@@ -6,6 +6,13 @@ import (
 	"github.com/signintech/gopdf"
 )
 
+type axis bool
+
+const (
+	horizontal axis = false
+	vertical   axis = true
+)
+
 type FlexItem interface {
 	draw(*gopdf.GoPdf, rect) error
 	getPreferredSize(*gopdf.GoPdf) (*size, error)
@@ -14,6 +21,26 @@ type FlexItem interface {
 type size struct {
 	w float64
 	h float64
+}
+
+func (s size) getLength(a axis) float64 {
+	if a == horizontal {
+		return s.w
+	} else {
+		return s.h
+	}
+}
+
+type rect struct {
+	x, y, w, h float64
+}
+
+func (s rect) getLength(a axis) float64 {
+	if a == horizontal {
+		return s.w
+	} else {
+		return s.h
+	}
 }
 
 func setColor(pdf *gopdf.GoPdf, col color.Color) error {

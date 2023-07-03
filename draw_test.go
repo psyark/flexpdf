@@ -30,16 +30,11 @@ func TestXxx(t *testing.T) {
 	root := &Box{
 		Direction: DirectionColumn,
 		Items: []FlexItem{
-			&Box{
-				BackgroundColor: color.RGBA{G: 0xFF, A: 0x80},
-				Items: []FlexItem{
-					&Box{},
-					&Text{Text: "あいうえお\nかきくけこさしすせそ\nたちつ", FontFamily: "ipaexg", FontSize: 20, LineHeight: 1.5},
-					&Text{Text: "abc", FontFamily: "ipaexm", FontSize: 30},
-				},
-			},
-			&Text{Text: "あいうえお\nかきくけこさしすせそ\nたちつ", FontFamily: "ipaexg", FontSize: 20, LineHeight: 1.5},
-			&Text{Text: "abc", FontFamily: "ipaexm", FontSize: 30},
+			testJustifyContent(JustifyContentFlexStart),
+			testJustifyContent(JustifyContentFlexEnd),
+			testJustifyContent(JustifyContentCenter),
+			testJustifyContent(JustifyContentSpaceBetween),
+			testJustifyContent(JustifyContentSpaceAround),
 		},
 	}
 
@@ -54,5 +49,32 @@ func TestXxx(t *testing.T) {
 
 	if err := os.WriteFile("out.pdf", data, 0666); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func testJustifyContent(jc JustifyContent) *Box {
+	return &Box{
+		Direction: DirectionColumn,
+		Items: []FlexItem{
+			&Text{Text: string(jc) + ":", FontFamily: "ipaexg", FontSize: 20},
+			&Box{
+				BackgroundColor: color.RGBA{0x88, 0x88, 0x88, 0xFF},
+				JustifyContent:  jc,
+				Items: []FlexItem{
+					&Box{
+						BackgroundColor: color.RGBA{0xFF, 0xCC, 0xCC, 0xFF},
+						Items:           []FlexItem{&Text{Text: "あいうえお", FontFamily: "ipaexg", FontSize: 24}},
+					},
+					&Box{
+						BackgroundColor: color.RGBA{0xCC, 0xFF, 0xCC, 0xFF},
+						Items:           []FlexItem{&Text{Text: "あいうえお", FontFamily: "ipaexg", FontSize: 24}},
+					},
+					&Box{
+						BackgroundColor: color.RGBA{0xCC, 0xCC, 0xFF, 0xFF},
+						Items:           []FlexItem{&Text{Text: "あいうえお かきくけこ", FontFamily: "ipaexg", FontSize: 24}},
+					},
+				},
+			},
+		},
 	}
 }

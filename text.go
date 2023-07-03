@@ -3,6 +3,7 @@ package flexpdf
 import (
 	"image/color"
 
+	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
 )
 
@@ -16,12 +17,12 @@ type Text struct {
 
 func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
-		return err
+		return errors.Wrap(err, "setFont")
 	}
 
 	ps, err := t.getPreferredSize(pdf)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "getPreferredSize")
 	}
 
 	{
@@ -30,18 +31,20 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 			c = color.Black
 		}
 		if err := setColor(pdf, c); err != nil {
-			return err
+			return errors.Wrap(err, "setColor")
 		}
 	}
 
 	pdf.SetXY(r.x, r.y)
 	lines, err := pdf.SplitTextWithWordWrap(t.Text, 10000000)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "splitTextWithWordWrap")
 	}
 
 	for _, line := range lines {
-		pdf.MultiCell(&gopdf.Rect{W: 10000000, H: 100000}, line)
+		if err := pdf.MultiCell(&gopdf.Rect{W: 10000000, H: 100000}, line); err != nil {
+			return errors.Wrap(err, "multiCell")
+		}
 		if t.LineHeight != 0 && t.LineHeight != 1 {
 			pdf.Br((t.LineHeight - 1) * t.FontSize)
 			pdf.SetX(r.x)
@@ -51,7 +54,7 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 	{ // TODO デバッグ用
 		pdf.SetLineType("dotted")
 		if err := pdf.Rectangle(r.x, r.y, r.x+ps.w, r.y+ps.h, "D", 0, 0); err != nil {
-			return err
+			return errors.Wrap(err, "rectangle")
 		}
 	}
 
