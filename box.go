@@ -3,6 +3,7 @@ package flexpdf
 import (
 	"image/color"
 	"log"
+	"math"
 
 	"github.com/signintech/gopdf"
 )
@@ -30,10 +31,10 @@ func (b *Box) draw(pdf *gopdf.GoPdf, r rect) error {
 		}
 	}
 
-	log.Println("dir:", b.Direction)
-	// 子孫
+	log.Printf("Direction=%q JustifyContent=%q AlignItems=%q\n", b.Direction, b.JustifyContent, b.AlignItems)
 
-	x := r.x
+	// 子孫
+	itemRect := rect{x: r.x, y: r.y}
 	for _, item := range b.Items {
 		ps, err := item.getPreferredSize(pdf)
 		if err != nil {
@@ -42,12 +43,37 @@ func (b *Box) draw(pdf *gopdf.GoPdf, r rect) error {
 
 		log.Println(ps.w, ps.h)
 
-		if err := item.draw(pdf, rect{x: x, y: r.y, w: ps.w, h: ps.h}); err != nil {
+		itemRect.w = ps.w
+		itemRect.h = ps.h
+
+		if err := item.draw(pdf, itemRect); err != nil {
 			return err
 		}
 
-		x += ps.w
+		if isHorizontal(b.Direction) {
+			itemRect.x += ps.w
+		} else {
+			itemRect.y += ps.h
+		}
 	}
 
 	return nil
+}
+
+func (b *Box) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
+	ps := &size{}
+	for _, item := range b.Items {
+		ips, err := item.getPreferredSize(pdf)
+		if err != nil {
+			return nil, err
+		}
+		if isHorizontal(b.Direction) {
+			ps.w += ips.w
+			ps.h = math.Max(ps.h, ips.h)
+		} else {
+			ps.w = math.Max(ps.w, ips.w)
+			ps.h += ips.h
+		}
+	}
+	return ps, nil
 }

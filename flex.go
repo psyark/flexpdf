@@ -1,12 +1,35 @@
 package flexpdf
 
-type Direction string
+type Direction int
 
 const (
-	DirectionRow    Direction = "row"
-	DirectionColumn Direction = "column"
+	DirectionRow Direction = iota
+	DirectionColumn
 )
 
+func (d Direction) String() string {
+	switch d {
+	case DirectionRow:
+		return "row"
+	case DirectionColumn:
+		return "column"
+	default:
+		panic(d)
+	}
+}
+
+func isHorizontal(d Direction) bool {
+	switch d {
+	case DirectionRow:
+		return true
+	case DirectionColumn:
+		return false
+	default:
+		panic(d)
+	}
+}
+
+// https://www.w3.org/TR/css-flexbox/#justify-content-property
 type JustifyContent string
 
 const (
@@ -18,6 +41,7 @@ const (
 	JustifyContentSpaceEvenly  JustifyContent = "space-evenly"
 )
 
+// https://www.w3.org/TR/css-flexbox/#propdef-align-items
 type AlignItems string
 
 const (

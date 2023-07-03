@@ -27,15 +27,23 @@ func TestXxx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	box := &Box{
-		BackgroundColor: color.RGBA{R: 0xFF, A: 0x80},
+	root := &Box{
+		Direction: DirectionColumn,
 		Items: []FlexItem{
+			&Box{
+				BackgroundColor: color.RGBA{G: 0xFF, A: 0x80},
+				Items: []FlexItem{
+					&Box{},
+					&Text{Text: "あいうえお\nかきくけこさしすせそ\nたちつ", FontFamily: "ipaexg", FontSize: 20, LineHeight: 1.5},
+					&Text{Text: "abc", FontFamily: "ipaexm", FontSize: 30},
+				},
+			},
 			&Text{Text: "あいうえお\nかきくけこさしすせそ\nたちつ", FontFamily: "ipaexg", FontSize: 20, LineHeight: 1.5},
 			&Text{Text: "abc", FontFamily: "ipaexm", FontSize: 30},
 		},
 	}
 
-	if err := Draw(pdf, box, gopdf.PageSizeA4); err != nil {
+	if err := Draw(pdf, root, gopdf.PageSizeA4); err != nil {
 		t.Fatal(err)
 	}
 
