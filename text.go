@@ -15,7 +15,11 @@ type Text struct {
 }
 
 func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
-	w, h, err := t.getSize(pdf)
+	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
+		return err
+	}
+
+	ps, err := t.getPreferredSize(pdf)
 	if err != nil {
 		return err
 	}
@@ -44,39 +48,43 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 		}
 	}
 
-	pdf.Rectangle(r.x, r.y, r.x+w, r.y+h, "D", 0, 0)
+	{ // TODO デバッグ用
+		pdf.SetLineType("dotted")
+		if err := pdf.Rectangle(r.x, r.y, r.x+ps.w, r.y+ps.h, "D", 0, 0); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
 
-func (t *Text) getSize(pdf *gopdf.GoPdf) (float64, float64, error) {
+func (t *Text) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
-		return 0, 0, err
+		return nil, err
 	}
-
-	// pdf.MeasureTextWidth()
 
 	lines, err := pdf.SplitTextWithWordWrap(t.Text, 10000000)
 	if err != nil {
-		return 0, 0, err
+		return nil, err
 	}
 
-	h := t.FontSize * float64(len(lines))
+	ps := &size{
+		h: t.FontSize * float64(len(lines)),
+	}
 	if t.LineHeight != 0 {
-		h += (t.FontSize * (t.LineHeight - 1)) * float64(len(lines)-1)
+		ps.h += (t.FontSize * (t.LineHeight - 1)) * float64(len(lines)-1)
 	}
 
-	var mw float64
 	for _, line := range lines {
 		w, err := pdf.MeasureTextWidth(line)
 		if err != nil {
-			return 0, 0, err
+			return nil, err
 		}
-		if mw < w {
-			mw = w
+		if ps.w < w {
+			ps.w = w
 		}
 	}
-	return mw, h, nil
+	return ps, nil
 }
 
 type TextSpan struct {

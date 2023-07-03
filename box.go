@@ -15,7 +15,7 @@ type Box struct {
 	Items           []FlexItem
 }
 
-func (b *Box) draw(pdf *gopdf.GoPdf, rect rect) error {
+func (b *Box) draw(pdf *gopdf.GoPdf, r rect) error {
 	if err := pdf.SetFont("ipaexg", "", 20); err != nil {
 		return err
 	}
@@ -25,30 +25,29 @@ func (b *Box) draw(pdf *gopdf.GoPdf, rect rect) error {
 		if err := setColor(pdf, b.BackgroundColor); err != nil {
 			return err
 		}
-		if err := pdf.Rectangle(rect.x, rect.y, rect.x+rect.w, rect.y+rect.h, "F", 0, 0); err != nil {
+		if err := pdf.Rectangle(r.x, r.y, r.x+r.w, r.y+r.h, "F", 0, 0); err != nil {
 			return err
 		}
 	}
 
 	log.Println("dir:", b.Direction)
 	// 子孫
+
+	x := r.x
 	for _, item := range b.Items {
-		if err := item.draw(pdf, rect); err != nil {
+		ps, err := item.getPreferredSize(pdf)
+		if err != nil {
 			return err
 		}
+
+		log.Println(ps.w, ps.h)
+
+		if err := item.draw(pdf, rect{x: x, y: r.y, w: ps.w, h: ps.h}); err != nil {
+			return err
+		}
+
+		x += ps.w
 	}
 
-	return nil
-}
-
-func setColor(pdf *gopdf.GoPdf, col color.Color) error {
-	r, g, b, a := col.RGBA()
-	if a == 0xFFFF {
-		pdf.ClearTransparency()
-	} else if err := pdf.SetTransparency(gopdf.Transparency{Alpha: float64(a) / 0xFFFF, BlendModeType: gopdf.NormalBlendMode}); err != nil {
-		return err
-	}
-
-	pdf.SetFillColor(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 	return nil
 }
