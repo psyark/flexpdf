@@ -73,7 +73,13 @@ func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {
 		Width:     -1,
 		Height:    -1,
 		Items: []FlexItem{
-			&Text{Text: string(jc) + ":", FontFamily: "ipaexg", FontSize: 20},
+			&Text{
+				Width:      -1,
+				Height:     -1,
+				Text:       string(jc) + ":",
+				FontFamily: "ipaexg",
+				FontSize:   20,
+			},
 			&Box{
 				Width:           -1,
 				Height:          -1,
@@ -82,35 +88,29 @@ func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {
 				Border:          UniformedBorder(color.RGBA{A: 0xFF}, BorderStyleSolid, 2),
 				JustifyContent:  jc,
 				Items: []FlexItem{
-					&Box{
+					&Text{
 						Width:           80,
 						Height:          80,
 						BackgroundColor: color.RGBA{0xFF, 0xCC, 0xCC, 0xFF},
-						Items: []FlexItem{&Text{
-							Width:      80,
-							Height:     80,
-							Text:       "あいうえお",
-							FontFamily: "ipaexg",
-							FontSize:   24,
-						}},
+						Text:            "あいうえお",
+						FontFamily:      "ipaexg",
+						FontSize:        24,
 					},
-					&Box{
-						Width:           -1,
-						Height:          -1,
+					&Text{
 						BackgroundColor: color.RGBA{0xCC, 0xFF, 0xCC, 0xFF},
-						Items: []FlexItem{&Text{
-							Width:  -1,
-							Height: -1,
-							Text:   "かきくけこ", FontFamily: "ipaexg", FontSize: 24}},
-					},
-					&Box{
 						Width:           -1,
 						Height:          -1,
+						Text:            "かきくけこ",
+						FontFamily:      "ipaexg",
+						FontSize:        24,
+					},
+					&Text{
 						BackgroundColor: color.RGBA{0xCC, 0xCC, 0xFF, 0xFF},
-						Items: []FlexItem{&Text{
-							Width:  -1,
-							Height: -1,
-							Text:   "さしすせそ たちつてと", FontFamily: "ipaexg", FontSize: 24}},
+						Width:           -1,
+						Height:          -1,
+						Text:            "さしすせそ たちつてと",
+						FontFamily:      "ipaexg",
+						FontSize:        24,
 					},
 				},
 			},

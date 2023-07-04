@@ -28,6 +28,17 @@ type Text struct {
 
 func (t *Text) draw(pdf *gopdf.GoPdf, r rect, depth int) error {
 	log.Printf("%sText.draw(r=%v, t=%q)\n", strings.Repeat("  ", depth), r, t.Text)
+
+	// 背景色
+	if t.BackgroundColor != nil && r.w != 0 && r.h != 0 {
+		if err := setColor(pdf, t.BackgroundColor); err != nil {
+			return err
+		}
+		if err := pdf.Rectangle(r.x, r.y, r.x+r.w, r.y+r.h, "F", 0, 0); err != nil {
+			return errors.Wrap(err, "rectangle")
+		}
+	}
+
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
 		return errors.Wrap(err, "setFont")
 	}
