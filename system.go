@@ -13,6 +13,11 @@ const (
 	vertical   axis = true
 )
 
+var (
+	_ FlexItem = &Text{}
+	_ FlexItem = &Box{}
+)
+
 type FlexItem interface {
 	draw(*gopdf.GoPdf, rect) error
 	getPreferredSize(*gopdf.GoPdf) (*size, error)

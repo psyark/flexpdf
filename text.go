@@ -7,12 +7,16 @@ import (
 	"github.com/signintech/gopdf"
 )
 
+// Text はテキストを扱うエレメントです
+// linebot同様、Textはサイズに関するプロパティ(Width, MaxWidth, ...)を持ちません
+// これらを利用するにはBoxとTextを組み合わせてください
 type Text struct {
 	FontFamily string
 	FontSize   float64
 	Text       string
 	Color      color.Color
 	LineHeight float64
+	Border     Border
 }
 
 func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
@@ -51,6 +55,10 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 		}
 	}
 
+	if err := t.Border.draw(pdf, r); err != nil {
+		return err
+	}
+
 	{ // TODO デバッグ用
 		pdf.SetLineType("dotted")
 		if err := pdf.Rectangle(r.x, r.y, r.x+ps.w, r.y+ps.h, "D", 0, 0); err != nil {
@@ -60,7 +68,6 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 
 	return nil
 }
-
 func (t *Text) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
 		return nil, err

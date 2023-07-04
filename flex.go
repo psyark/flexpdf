@@ -17,7 +17,6 @@ func (d Direction) String() string {
 		panic(d)
 	}
 }
-
 func (d Direction) mainAxis() axis {
 	switch d {
 	case DirectionRow:

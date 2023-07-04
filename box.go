@@ -9,12 +9,23 @@ import (
 	"github.com/signintech/gopdf"
 )
 
+// FlexBasis は持たず、 Width/Heightでサイズが指定してあればそのサイズ（basis=auto同等）
+// Width/Heightが指定してなければ子要素のサイズ(basis=content)となる
 type Box struct {
 	Direction       Direction
+	Width           *float64
+	Height          *float64
+	Border          Border
+	FlexGrow        float64
+	FlexShrink      float64
 	JustifyContent  JustifyContent
 	AlignItems      AlignItems
 	BackgroundColor color.Color
 	Items           []FlexItem
+}
+
+func NewBox() *Box {
+	return &Box{FlexGrow: 0, FlexShrink: 1}
 }
 
 func (b *Box) draw(pdf *gopdf.GoPdf, r rect) error {
@@ -88,9 +99,12 @@ func (b *Box) draw(pdf *gopdf.GoPdf, r rect) error {
 		}
 	}
 
+	if err := b.Border.draw(pdf, r); err != nil {
+		return err
+	}
+
 	return nil
 }
-
 func (b *Box) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 	ps := &size{}
 	for _, item := range b.Items {
@@ -105,6 +119,12 @@ func (b *Box) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 			ps.w = math.Max(ps.w, ips.w)
 			ps.h += ips.h
 		}
+	}
+	if b.Width != nil {
+		ps.w = *b.Width
+	}
+	if b.Height != nil {
+		ps.h = *b.Height
 	}
 	return ps, nil
 }

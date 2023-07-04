@@ -30,11 +30,8 @@ func TestXxx(t *testing.T) {
 	root := &Box{
 		Direction: DirectionColumn,
 		Items: []FlexItem{
-			testJustifyContent(JustifyContentFlexStart),
-			testJustifyContent(JustifyContentFlexEnd),
-			testJustifyContent(JustifyContentCenter),
-			testJustifyContent(JustifyContentSpaceBetween),
-			testJustifyContent(JustifyContentSpaceAround),
+			createJustifyContentExamples(DirectionColumn, DirectionRow),
+			createJustifyContentExamples(DirectionRow, DirectionColumn),
 		},
 	}
 
@@ -52,12 +49,29 @@ func TestXxx(t *testing.T) {
 	}
 }
 
-func testJustifyContent(jc JustifyContent) *Box {
+func createJustifyContentExamples(dir1, dir2 Direction) *Box {
+	h := 300.0
+	return &Box{
+		Direction: dir1,
+		Border:    UniformedBorder(color.Black, BorderStyleDashed, 2.0),
+		Height:    &h,
+		Items: []FlexItem{
+			createJustifyContentExample(dir2, JustifyContentFlexStart),
+			createJustifyContentExample(dir2, JustifyContentFlexEnd),
+			createJustifyContentExample(dir2, JustifyContentCenter),
+			createJustifyContentExample(dir2, JustifyContentSpaceBetween),
+			createJustifyContentExample(dir2, JustifyContentSpaceAround),
+		},
+	}
+}
+
+func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {
 	return &Box{
 		Direction: DirectionColumn,
 		Items: []FlexItem{
 			&Text{Text: string(jc) + ":", FontFamily: "ipaexg", FontSize: 20},
 			&Box{
+				Direction:       dir,
 				BackgroundColor: color.RGBA{0x88, 0x88, 0x88, 0xFF},
 				JustifyContent:  jc,
 				Items: []FlexItem{
