@@ -90,7 +90,7 @@ func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {
 				Items: []FlexItem{
 					&Text{
 						Width:           80,
-						Height:          80,
+						Height:          40,
 						BackgroundColor: color.RGBA{0xFF, 0xCC, 0xCC, 0xFF},
 						Text:            "あいうえお",
 						FontFamily:      "ipaexg",
