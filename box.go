@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"log"
 	"math"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
@@ -12,23 +13,30 @@ import (
 // FlexBasis は持たず、 Width/Heightでサイズが指定してあればそのサイズ（basis=auto同等）
 // Width/Heightが指定してなければ子要素のサイズ(basis=content)となる
 type Box struct {
-	Direction       Direction
-	Width           *float64
-	Height          *float64
+	// 共通フィールド
+	Width           float64
+	Height          float64
 	Border          Border
 	FlexGrow        float64
 	FlexShrink      float64
-	JustifyContent  JustifyContent
-	AlignItems      AlignItems
 	BackgroundColor color.Color
-	Items           []FlexItem
+
+	Direction      Direction
+	JustifyContent JustifyContent
+	AlignItems     AlignItems
+	Items          []FlexItem
 }
 
 func NewBox() *Box {
-	return &Box{FlexGrow: 0, FlexShrink: 1}
+	return &Box{
+		Width:      -1,
+		Height:     -1,
+		FlexShrink: 1,
+	}
 }
+func (b *Box) draw(pdf *gopdf.GoPdf, r rect, depth int) error {
+	log.Printf("%sBox.draw(r=%v, d=%v jc=%v ai=%v)\n", strings.Repeat("  ", depth), r, b.Direction, b.JustifyContent, b.AlignItems)
 
-func (b *Box) draw(pdf *gopdf.GoPdf, r rect) error {
 	// 背景色
 	if b.BackgroundColor != nil && r.w != 0 && r.h != 0 {
 		if err := setColor(pdf, b.BackgroundColor); err != nil {
@@ -39,13 +47,10 @@ func (b *Box) draw(pdf *gopdf.GoPdf, r rect) error {
 		}
 	}
 
-	log.Printf("Direction=%q JustifyContent=%q AlignItems=%q\n", b.Direction, b.JustifyContent, b.AlignItems)
-
 	// 子孫
 	itemRect := r
 	prefSizes := make([]*size, len(b.Items))
 	mainAxisRemains := r.getLength(b.Direction.mainAxis())
-	log.Println(mainAxisRemains)
 	for i, item := range b.Items {
 		ps, err := item.getPreferredSize(pdf)
 		if err != nil {
@@ -81,7 +86,7 @@ func (b *Box) draw(pdf *gopdf.GoPdf, r rect) error {
 			itemRect.h = ps.h
 		}
 
-		if err := item.draw(pdf, itemRect); err != nil {
+		if err := item.draw(pdf, itemRect, depth+1); err != nil {
 			return errors.Wrap(err, "item.draw")
 		}
 
@@ -120,11 +125,11 @@ func (b *Box) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 			ps.h += ips.h
 		}
 	}
-	if b.Width != nil {
-		ps.w = *b.Width
+	if b.Width >= 0 {
+		ps.w = b.Width
 	}
-	if b.Height != nil {
-		ps.h = *b.Height
+	if b.Height >= 0 {
+		ps.h = b.Height
 	}
 	return ps, nil
 }

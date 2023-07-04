@@ -2,24 +2,32 @@ package flexpdf
 
 import (
 	"image/color"
+	"log"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
 )
 
 // Text はテキストを扱うエレメントです
-// linebot同様、Textはサイズに関するプロパティ(Width, MaxWidth, ...)を持ちません
-// これらを利用するにはBoxとTextを組み合わせてください
 type Text struct {
+	// 共通フィールド
+	Width           float64
+	Height          float64
+	Border          Border
+	FlexGrow        float64
+	FlexShrink      float64
+	BackgroundColor color.Color
+
 	FontFamily string
 	FontSize   float64
 	Text       string
 	Color      color.Color
 	LineHeight float64
-	Border     Border
 }
 
-func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
+func (t *Text) draw(pdf *gopdf.GoPdf, r rect, depth int) error {
+	log.Printf("%sText.draw(r=%v, t=%q)\n", strings.Repeat("  ", depth), r, t.Text)
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
 		return errors.Wrap(err, "setFont")
 	}
@@ -35,13 +43,18 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 	}
 
 	pdf.SetXY(r.x, r.y)
-	lines, err := pdf.SplitTextWithWordWrap(t.Text, 10000000)
+	// TODO 幅が小さすぎる場合に無限ループになるのを抑制
+	if r.w < 20 {
+		return nil
+	}
+
+	lines, err := pdf.SplitTextWithWordWrap(t.Text, r.w)
 	if err != nil {
 		return errors.Wrap(err, "splitTextWithWordWrap")
 	}
 
 	for _, line := range lines {
-		if err := pdf.MultiCell(&gopdf.Rect{W: 10000000, H: 100000}, line); err != nil {
+		if err := pdf.MultiCell(&gopdf.Rect{W: r.w, H: r.h}, line); err != nil {
 			return errors.Wrap(err, "multiCell")
 		}
 		if t.LineHeight != 0 && t.LineHeight != 1 {
@@ -82,6 +95,14 @@ func (t *Text) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 			ps.w = w
 		}
 	}
+
+	if t.Width >= 0 {
+		ps.w = t.Width
+	}
+	if t.Height >= 0 {
+		ps.h = t.Height
+	}
+
 	return ps, nil
 }
 

@@ -35,26 +35,28 @@ func TestXxx(t *testing.T) {
 		},
 	}
 
+	t.Log("draw start")
 	if err := Draw(pdf, root, gopdf.PageSizeA4); err != nil {
 		t.Fatal(err)
 	}
 
+	t.Log("draw end")
 	data, err := pdf.GetBytesPdfReturnErr()
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	t.Log("write start")
 	if err := os.WriteFile("out.pdf", data, 0666); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func createJustifyContentExamples(dir1, dir2 Direction) *Box {
-	h := 300.0
 	return &Box{
 		Direction: dir1,
 		Border:    UniformedBorder(color.Black, BorderStyleDashed, 2.0),
-		Height:    &h,
+		Height:    300,
 		Items: []FlexItem{
 			createJustifyContentExample(dir2, JustifyContentFlexStart),
 			createJustifyContentExample(dir2, JustifyContentFlexEnd),
@@ -68,24 +70,47 @@ func createJustifyContentExamples(dir1, dir2 Direction) *Box {
 func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {
 	return &Box{
 		Direction: DirectionColumn,
+		Width:     -1,
+		Height:    -1,
 		Items: []FlexItem{
 			&Text{Text: string(jc) + ":", FontFamily: "ipaexg", FontSize: 20},
 			&Box{
+				Width:           -1,
+				Height:          -1,
 				Direction:       dir,
 				BackgroundColor: color.RGBA{0x88, 0x88, 0x88, 0xFF},
+				Border:          UniformedBorder(color.RGBA{A: 0xFF}, BorderStyleSolid, 2),
 				JustifyContent:  jc,
 				Items: []FlexItem{
 					&Box{
+						Width:           80,
+						Height:          80,
 						BackgroundColor: color.RGBA{0xFF, 0xCC, 0xCC, 0xFF},
-						Items:           []FlexItem{&Text{Text: "あいうえお", FontFamily: "ipaexg", FontSize: 24}},
+						Items: []FlexItem{&Text{
+							Width:      80,
+							Height:     80,
+							Text:       "あいうえお",
+							FontFamily: "ipaexg",
+							FontSize:   24,
+						}},
 					},
 					&Box{
+						Width:           -1,
+						Height:          -1,
 						BackgroundColor: color.RGBA{0xCC, 0xFF, 0xCC, 0xFF},
-						Items:           []FlexItem{&Text{Text: "あいうえお", FontFamily: "ipaexg", FontSize: 24}},
+						Items: []FlexItem{&Text{
+							Width:  -1,
+							Height: -1,
+							Text:   "かきくけこ", FontFamily: "ipaexg", FontSize: 24}},
 					},
 					&Box{
+						Width:           -1,
+						Height:          -1,
 						BackgroundColor: color.RGBA{0xCC, 0xCC, 0xFF, 0xFF},
-						Items:           []FlexItem{&Text{Text: "あいうえお かきくけこ", FontFamily: "ipaexg", FontSize: 24}},
+						Items: []FlexItem{&Text{
+							Width:  -1,
+							Height: -1,
+							Text:   "さしすせそ たちつてと", FontFamily: "ipaexg", FontSize: 24}},
 					},
 				},
 			},
