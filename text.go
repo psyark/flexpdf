@@ -24,11 +24,6 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 		return errors.Wrap(err, "setFont")
 	}
 
-	ps, err := t.getPreferredSize(pdf)
-	if err != nil {
-		return errors.Wrap(err, "getPreferredSize")
-	}
-
 	{
 		c := t.Color
 		if c == nil {
@@ -57,13 +52,6 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect) error {
 
 	if err := t.Border.draw(pdf, r); err != nil {
 		return err
-	}
-
-	{ // TODO デバッグ用
-		pdf.SetLineType("dotted")
-		if err := pdf.Rectangle(r.x, r.y, r.x+ps.w, r.y+ps.h, "D", 0, 0); err != nil {
-			return errors.Wrap(err, "rectangle")
-		}
 	}
 
 	return nil

@@ -49,23 +49,24 @@ type BorderPart struct {
 }
 
 func (p *BorderPart) draw(pdf *gopdf.GoPdf, x1, y1, x2, y2 float64) error {
-	if p.Color != nil {
+	if p.Color != nil && p.Width > 0 {
 		if err := setColor(pdf, p.Color); err != nil {
 			return err
 		}
-	}
-	switch p.Style {
-	case BorderStyleDashed:
-		pdf.SetLineType("dashed")
-	case BorderStyleDotted:
-		pdf.SetLineType("dotted")
-	case BorderStyleSolid:
-		pdf.SetLineType("")
-	default:
-		panic(p.Style)
-	}
 
-	pdf.SetLineWidth(p.Width)
-	pdf.Line(x1, y1, x2, y2)
+		switch p.Style {
+		case BorderStyleDashed:
+			pdf.SetLineType("dashed")
+		case BorderStyleDotted:
+			pdf.SetLineType("dotted")
+		case BorderStyleSolid:
+			pdf.SetLineType("")
+		default:
+			panic(p.Style)
+		}
+
+		pdf.SetLineWidth(p.Width)
+		pdf.Line(x1, y1, x2, y2)
+	}
 	return nil
 }
