@@ -2,8 +2,8 @@ package flexpdf
 
 import "image/color"
 
-type flexItemCommon[T any] struct {
-	self            *T
+type flexItemCommon[T FlexItem] struct {
+	self            T
 	Width           float64
 	Height          float64
 	FlexGrow        float64
@@ -14,7 +14,7 @@ type flexItemCommon[T any] struct {
 	Padding         Spacing
 }
 
-func (c *flexItemCommon[T]) init(self *T) {
+func (c *flexItemCommon[T]) init(self T) {
 	c.self = self
 	c.Width = -1
 	c.Height = -1
@@ -24,24 +24,24 @@ func (c *flexItemCommon[T]) init(self *T) {
 	c.Border = UniformedBorder(nil, BorderStyleSolid, 0) // TODO None
 }
 
-func (c *flexItemCommon[T]) SetWidth(w float64) *T {
+func (c *flexItemCommon[T]) SetWidth(w float64) T {
 	c.Width = w
 	return c.self
 }
-func (c *flexItemCommon[T]) SetHeight(h float64) *T {
+func (c *flexItemCommon[T]) SetHeight(h float64) T {
 	c.Height = h
 	return c.self
 }
-func (c *flexItemCommon[T]) SetSize(w, h float64) *T {
+func (c *flexItemCommon[T]) SetSize(w, h float64) T {
 	c.Width = w
 	c.Height = h
 	return c.self
 }
-func (b *flexItemCommon[T]) SetBackgroundColor(c color.Color) *T {
+func (b *flexItemCommon[T]) SetBackgroundColor(c color.Color) T {
 	b.BackgroundColor = c
 	return b.self
 }
-func (c *flexItemCommon[T]) SetBorder(border Border) *T {
+func (c *flexItemCommon[T]) SetBorder(border Border) T {
 	c.Border = border
 	return c.self
 }

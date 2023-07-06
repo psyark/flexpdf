@@ -13,7 +13,7 @@ import (
 // Width/Heightが指定してなければ子要素のサイズ(basis=content)となる
 type Box struct {
 	// 共通フィールド
-	flexItemCommon[Box]
+	flexItemCommon[*Box]
 
 	Direction      Direction
 	JustifyContent JustifyContent

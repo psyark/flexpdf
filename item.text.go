@@ -12,7 +12,7 @@ import (
 // Text はテキストを扱うエレメントです
 // TODO family, size, color, text は Spanのスライスにする
 type Text struct {
-	flexItemCommon[Text]
+	flexItemCommon[*Text]
 
 	FontFamily string
 	FontSize   float64
