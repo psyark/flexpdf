@@ -10,20 +10,41 @@ import (
 )
 
 // Text はテキストを扱うエレメントです
+// TODO family, size, color, text は Spanのスライスにする
 type Text struct {
-	// 共通フィールド
-	Width           float64
-	Height          float64
-	Border          Border
-	FlexGrow        float64
-	FlexShrink      float64
-	BackgroundColor color.Color
+	flexItemCommon
 
 	FontFamily string
 	FontSize   float64
 	Text       string
 	Color      color.Color
 	LineHeight float64
+}
+
+func NewText(family string, size float64, text string) *Text {
+	t := &Text{}
+	t.Width = -1
+	t.Height = -1
+
+	t.FontFamily = family
+	t.FontSize = size
+	t.Text = text
+	return t
+}
+func (t *Text) SetWidth(w float64) *Text {
+	t.Width = w
+	return t
+}
+func (t *Text) SetHeight(h float64) *Text {
+	t.Height = h
+	return t
+}
+func (t *Text) SetSize(w, h float64) *Text {
+	return t.SetWidth(w).SetHeight(h)
+}
+func (t *Text) SetBackgroundColor(c color.Color) *Text {
+	t.BackgroundColor = c
+	return t
 }
 
 func (t *Text) draw(pdf *gopdf.GoPdf, r rect, depth int) error {

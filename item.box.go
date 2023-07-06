@@ -14,12 +14,7 @@ import (
 // Width/Heightが指定してなければ子要素のサイズ(basis=content)となる
 type Box struct {
 	// 共通フィールド
-	Width           float64
-	Height          float64
-	Border          Border
-	FlexGrow        float64
-	FlexShrink      float64
-	BackgroundColor color.Color
+	flexItemCommon
 
 	Direction      Direction
 	JustifyContent JustifyContent
@@ -27,12 +22,38 @@ type Box struct {
 	Items          []FlexItem
 }
 
-func NewBox() *Box {
-	return &Box{
-		Width:      -1,
-		Height:     -1,
-		FlexShrink: 1,
+func NewBox(dir Direction, items ...FlexItem) *Box {
+	b := &Box{
+		Direction: dir,
+		Items:     items,
 	}
+	b.Width = -1
+	b.Height = -1
+	b.FlexShrink = 1
+	return b
+}
+func (b *Box) SetWidth(w float64) *Box {
+	b.Width = w
+	return b
+}
+func (b *Box) SetHeight(h float64) *Box {
+	b.Height = h
+	return b
+}
+func (b *Box) SetSize(w, h float64) *Box {
+	return b.SetWidth(w).SetHeight(h)
+}
+func (b *Box) SetBackgroundColor(c color.Color) *Box {
+	b.BackgroundColor = c
+	return b
+}
+func (b *Box) SetBorder(border Border) *Box {
+	b.Border = border
+	return b
+}
+func (b *Box) SetJustifyContent(jc JustifyContent) *Box {
+	b.JustifyContent = jc
+	return b
 }
 func (b *Box) draw(pdf *gopdf.GoPdf, r rect, depth int) error {
 	log.Printf("%sBox.draw(r=%v, d=%v jc=%v ai=%v)\n", strings.Repeat("  ", depth), r, b.Direction, b.JustifyContent, b.AlignItems)

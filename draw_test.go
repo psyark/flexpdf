@@ -27,13 +27,11 @@ func TestXxx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	root := &Box{
-		Direction: DirectionColumn,
-		Items: []FlexItem{
-			createJustifyContentExamples(DirectionColumn, DirectionRow),
-			createJustifyContentExamples(DirectionRow, DirectionColumn),
-		},
-	}
+	root := NewBox(
+		DirectionColumn,
+		createJustifyContentExamples(DirectionColumn, DirectionRow),
+		createJustifyContentExamples(DirectionRow, DirectionColumn),
+	)
 
 	t.Log("draw start")
 	if err := Draw(pdf, root, gopdf.PageSizeA4); err != nil {
@@ -53,67 +51,31 @@ func TestXxx(t *testing.T) {
 }
 
 func createJustifyContentExamples(dir1, dir2 Direction) *Box {
-	return &Box{
-		Direction: dir1,
-		Border:    UniformedBorder(color.Black, BorderStyleDashed, 2.0),
-		Height:    300,
-		Items: []FlexItem{
-			createJustifyContentExample(dir2, JustifyContentFlexStart),
-			createJustifyContentExample(dir2, JustifyContentFlexEnd),
-			createJustifyContentExample(dir2, JustifyContentCenter),
-			createJustifyContentExample(dir2, JustifyContentSpaceBetween),
-			createJustifyContentExample(dir2, JustifyContentSpaceAround),
-		},
-	}
+	return NewBox(
+		dir1,
+		createJustifyContentExample(dir2, JustifyContentFlexStart),
+		createJustifyContentExample(dir2, JustifyContentFlexEnd),
+		createJustifyContentExample(dir2, JustifyContentCenter),
+		createJustifyContentExample(dir2, JustifyContentSpaceBetween),
+		createJustifyContentExample(dir2, JustifyContentSpaceAround),
+	).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 2.0)).SetHeight(300)
 }
 
 func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {
-	return &Box{
-		Direction: DirectionColumn,
-		Width:     -1,
-		Height:    -1,
-		Items: []FlexItem{
-			&Text{
-				Width:      -1,
-				Height:     -1,
-				Text:       string(jc) + ":",
-				FontFamily: "ipaexg",
-				FontSize:   20,
-			},
-			&Box{
-				Width:           -1,
-				Height:          -1,
-				Direction:       dir,
-				BackgroundColor: color.RGBA{0x88, 0x88, 0x88, 0xFF},
-				Border:          UniformedBorder(color.RGBA{A: 0xFF}, BorderStyleSolid, 2),
-				JustifyContent:  jc,
-				Items: []FlexItem{
-					&Text{
-						Width:           80,
-						Height:          40,
-						BackgroundColor: color.RGBA{0xFF, 0xCC, 0xCC, 0xFF},
-						Text:            "あいうえお",
-						FontFamily:      "ipaexg",
-						FontSize:        24,
-					},
-					&Text{
-						BackgroundColor: color.RGBA{0xCC, 0xFF, 0xCC, 0xFF},
-						Width:           -1,
-						Height:          -1,
-						Text:            "かきくけこ",
-						FontFamily:      "ipaexg",
-						FontSize:        24,
-					},
-					&Text{
-						BackgroundColor: color.RGBA{0xCC, 0xCC, 0xFF, 0xFF},
-						Width:           -1,
-						Height:          -1,
-						Text:            "さしすせそ たちつてと",
-						FontFamily:      "ipaexg",
-						FontSize:        24,
-					},
-				},
-			},
-		},
-	}
+	return NewBox(
+		DirectionColumn,
+		NewText("ipaexg", 20, string(jc)+":"),
+		NewBox(
+			dir,
+			NewText("ipaexg", 24, "あいうえお").SetSize(80, 40).SetBackgroundColor(color.RGBA{0xFF, 0xCC, 0xCC, 0xFF}),
+			NewText("ipaexg", 24, "かきくけこ").SetBackgroundColor(color.RGBA{0xCC, 0xFF, 0xCC, 0xFF}),
+			NewText("ipaexg", 24, "さしすせそ たちつてと").SetBackgroundColor(color.RGBA{0xCC, 0xCC, 0xFF, 0xFF}),
+		).SetBackgroundColor(
+			color.RGBA{0x88, 0x88, 0x88, 0xFF},
+		).SetBorder(
+			UniformedBorder(color.RGBA{A: 0xFF}, BorderStyleSolid, 2),
+		).SetJustifyContent(
+			jc,
+		),
+	)
 }
