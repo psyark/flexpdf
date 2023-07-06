@@ -25,6 +25,9 @@ type flexItemCommon[T flexItemExtender] struct {
 	Padding         Spacing
 }
 
+func (c *flexItemCommon[T]) getFlexGrow() float64 {
+	return c.FlexGrow
+}
 func (c *flexItemCommon[T]) init(self T) {
 	c.self = self
 	c.Width = -1
@@ -46,6 +49,14 @@ func (c *flexItemCommon[T]) SetHeight(h float64) T {
 func (c *flexItemCommon[T]) SetSize(w, h float64) T {
 	c.Width = w
 	c.Height = h
+	return c.self
+}
+func (c *flexItemCommon[T]) SetFlexGrow(g float64) T {
+	c.FlexGrow = g
+	return c.self
+}
+func (c *flexItemCommon[T]) SetFlexShrink(s float64) T {
+	c.FlexShrink = s
 	return c.self
 }
 func (b *flexItemCommon[T]) SetBackgroundColor(c color.Color) T {

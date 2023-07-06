@@ -21,6 +21,7 @@ var (
 type FlexItem interface {
 	draw(pdf *gopdf.GoPdf, r rect, depth int) error
 	getPreferredSize(*gopdf.GoPdf) (*size, error)
+	getFlexGrow() float64
 }
 
 type size struct {

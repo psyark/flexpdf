@@ -39,28 +39,41 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 	// 子孫
 	itemRect := r
 	prefSizes := make([]*size, len(b.Items))
-	mainAxisRemains := r.getLength(b.Direction.mainAxis())
-	for i, item := range b.Items {
-		ps, err := item.getPreferredSize(pdf)
-		if err != nil {
-			return err
-		}
-		prefSizes[i] = ps
-		mainAxisRemains -= ps.getLength(b.Direction.mainAxis())
-	}
+	growTotal := 0.0
 
-	if mainAxisRemains < 0 {
-		mainAxisRemains = 0
+	var spacing, growing float64
+	{
+		mainAxisRemains := r.getLength(b.Direction.mainAxis())
+		for i, item := range b.Items {
+			ps, err := item.getPreferredSize(pdf)
+			if err != nil {
+				return err
+			}
+			growTotal += item.getFlexGrow()
+			prefSizes[i] = ps
+			mainAxisRemains -= ps.getLength(b.Direction.mainAxis())
+		}
+
+		if mainAxisRemains < 0 {
+			mainAxisRemains = 0
+		}
+		if growTotal >= 1 {
+			growing = mainAxisRemains
+			spacing = 0
+		} else {
+			growing = mainAxisRemains * growTotal
+			spacing = mainAxisRemains - growing
+		}
 	}
 
 	if b.Direction.mainAxis() == horizontal {
 		switch b.JustifyContent {
 		case JustifyContentFlexEnd:
-			itemRect.x += mainAxisRemains
+			itemRect.x += spacing
 		case JustifyContentCenter:
-			itemRect.x += mainAxisRemains / 2
+			itemRect.x += spacing / 2
 		case JustifyContentSpaceAround:
-			itemRect.x += mainAxisRemains / float64(len(b.Items)*2)
+			itemRect.x += spacing / float64(len(b.Items)*2)
 		}
 	} else {
 		// TODO
@@ -70,6 +83,9 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 		ps := prefSizes[i]
 
 		if b.Direction.mainAxis() == horizontal {
+			if growTotal != 0 {
+				ps.w += growing * item.getFlexGrow() / growTotal
+			}
 			itemRect.w = ps.w
 		} else {
 			itemRect.h = ps.h
@@ -83,9 +99,9 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 			itemRect.x += ps.w
 			switch b.JustifyContent {
 			case JustifyContentSpaceBetween:
-				itemRect.x += mainAxisRemains / float64(len(b.Items)-1)
+				itemRect.x += spacing / float64(len(b.Items)-1)
 			case JustifyContentSpaceAround:
-				itemRect.x += mainAxisRemains / float64(len(b.Items))
+				itemRect.x += spacing / float64(len(b.Items))
 			}
 		} else {
 			// TODO
