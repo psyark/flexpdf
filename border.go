@@ -16,14 +16,14 @@ const (
 
 type Border struct {
 	Color TRBL[color.Color]
-	Width TRBL[float64]
+	Width Spacing
 	Style TRBL[BorderStyle]
 }
 
 func UniformedBorder(col color.Color, style BorderStyle, width float64) Border {
 	return Border{
 		Color: TRBL[color.Color]{col, col, col, col},
-		Width: TRBL[float64]{width, width, width, width},
+		Width: Spacing{width, width, width, width},
 		Style: TRBL[BorderStyle]{style, style, style, style},
 	}
 }

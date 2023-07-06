@@ -28,9 +28,9 @@ type size struct {
 	h float64
 }
 
-func (s size) add(trbl TRBL[float64]) size {
-	s.w += trbl.Left + trbl.Right
-	s.h += trbl.Top + trbl.Bottom
+func (s size) add(spacing Spacing) size {
+	s.w += spacing.Left + spacing.Right
+	s.h += spacing.Top + spacing.Bottom
 	// TODO negative
 	return s
 }
@@ -54,11 +54,11 @@ func (s rect) getLength(a axis) float64 {
 		return s.h
 	}
 }
-func (s rect) shrink(trbl TRBL[float64]) rect {
-	s.x += trbl.Left
-	s.w -= trbl.Left + trbl.Right
-	s.y += trbl.Top
-	s.h -= trbl.Top + trbl.Bottom
+func (s rect) shrink(spacing Spacing) rect {
+	s.x += spacing.Left
+	s.w -= spacing.Left + spacing.Right
+	s.y += spacing.Top
+	s.h -= spacing.Top + spacing.Bottom
 	// TODO negative
 	return s
 }
@@ -81,3 +81,5 @@ type TRBL[T any] struct {
 	Bottom T
 	Left   T
 }
+
+type Spacing TRBL[float64]

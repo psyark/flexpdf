@@ -21,8 +21,8 @@ type flexItemCommon[T flexItemExtender] struct {
 	FlexShrink      float64
 	BackgroundColor color.Color
 	Border          Border
-	Margin          TRBL[float64]
-	Padding         TRBL[float64]
+	Margin          Spacing
+	Padding         Spacing
 }
 
 func (c *flexItemCommon[T]) init(self T) {
@@ -56,11 +56,11 @@ func (c *flexItemCommon[T]) SetBorder(border Border) T {
 	c.Border = border
 	return c.self
 }
-func (c *flexItemCommon[T]) SetMargin(margin TRBL[float64]) T {
+func (c *flexItemCommon[T]) SetMargin(margin Spacing) T {
 	c.Margin = margin
 	return c.self
 }
-func (c *flexItemCommon[T]) SetPadding(padding TRBL[float64]) T {
+func (c *flexItemCommon[T]) SetPadding(padding Spacing) T {
 	c.Padding = padding
 	return c.self
 }
@@ -101,7 +101,7 @@ func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 		ps.h = c.Height
 	}
 
-	for _, space := range []TRBL[float64]{c.Margin, c.Border.Width, c.Padding} {
+	for _, space := range []Spacing{c.Margin, c.Border.Width, c.Padding} {
 		ps = ps.add(space)
 	}
 

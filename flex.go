@@ -50,6 +50,6 @@ const (
 	AlignItemsStretch   AlignItems = "stretch"
 )
 
-func UniformedSpacing(width float64) TRBL[float64] {
-	return TRBL[float64]{width, width, width, width}
+func UniformedSpacing(width float64) Spacing {
+	return Spacing{width, width, width, width}
 }
