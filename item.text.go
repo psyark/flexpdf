@@ -9,6 +9,14 @@ import (
 	"github.com/signintech/gopdf"
 )
 
+type TextAlign int
+
+const (
+	TextAlignBegin TextAlign = iota
+	TextAlignCenter
+	TextAlignEnd
+)
+
 // Text はテキストを扱うエレメントです
 // TODO family, size, color, text は Spanのスライスにする
 type Text struct {
@@ -19,10 +27,15 @@ type Text struct {
 	Text       string
 	Color      color.Color
 	LineHeight float64
+	Align      TextAlign
 }
 
 func (t *Text) SetLineHeight(lineHeight float64) *Text {
 	t.LineHeight = lineHeight
+	return t
+}
+func (t *Text) SetAlign(align TextAlign) *Text {
+	t.Align = align
 	return t
 }
 
@@ -66,7 +79,18 @@ func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 	}
 
 	for _, line := range lines {
-		if err := pdf.MultiCell(&gopdf.Rect{W: r.w, H: r.h}, line); err != nil {
+		opt := gopdf.CellOption{}
+
+		switch t.Align {
+		case TextAlignBegin:
+			opt.Align = gopdf.Left
+		case TextAlignCenter:
+			opt.Align = gopdf.Center
+		case TextAlignEnd:
+			opt.Align = gopdf.Right
+		}
+
+		if err := pdf.MultiCellWithOption(&gopdf.Rect{W: r.w, H: r.h}, line, opt); err != nil {
 			return errors.Wrap(err, "multiCell")
 		}
 		if t.LineHeight != 0 && t.LineHeight != 1 {
