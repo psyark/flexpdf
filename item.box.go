@@ -23,8 +23,9 @@ type Box struct {
 
 func NewBox(dir Direction, items ...FlexItem) *Box {
 	b := &Box{
-		Direction: dir,
-		Items:     items,
+		Direction:  dir,
+		Items:      items,
+		AlignItems: AlignItemsStretch,
 	}
 	b.flexItemCommon.init(b)
 	return b
@@ -39,13 +40,19 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 	// 子孫
 	itemRect := r
 	prefSizes := make([]*size, len(b.Items))
-	growTotal := 0.0
 
-	var spacing, growing float64
+	var spacing float64
 	{
+		var growing, growTotal float64
 		mainAxisRemains := r.getLength(b.Direction.mainAxis())
+
+		// 1パス目は自然なサイズ
 		for i, item := range b.Items {
-			ps, err := item.getPreferredSize(pdf)
+			maxWidth := -1.0 // -1 -> 自然なサイズ
+			if b.Direction.mainAxis() == vertical {
+				maxWidth = r.w
+			}
+			ps, err := item.getPreferredSize(pdf, maxWidth)
 			if err != nil {
 				return err
 			}
@@ -63,6 +70,21 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 		} else {
 			growing = mainAxisRemains * growTotal
 			spacing = mainAxisRemains - growing
+		}
+
+		// 2パス目は幅を制限したときのサイズ
+		for i, item := range b.Items {
+			ps := prefSizes[i]
+			if growTotal != 0 {
+				ps.w += growing * item.getFlexGrow() / growTotal
+			}
+
+			ps2, err := item.getPreferredSize(pdf, ps.w) // 指定したサイズ
+			if err != nil {
+				return err
+			}
+			ps.h = ps2.h // 高さだけ更新
+			prefSizes[i] = ps
 		}
 	}
 
@@ -82,13 +104,17 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 	for i, item := range b.Items {
 		ps := prefSizes[i]
 
+		itemRect.w = ps.w
+		itemRect.h = ps.h
+
 		if b.Direction.mainAxis() == horizontal {
-			if growTotal != 0 {
-				ps.w += growing * item.getFlexGrow() / growTotal
+			if b.AlignItems == AlignItemsStretch {
+				itemRect.h = r.h
 			}
-			itemRect.w = ps.w
 		} else {
-			itemRect.h = ps.h
+			if b.AlignItems == AlignItemsStretch {
+				itemRect.w = r.w
+			}
 		}
 
 		if err := item.draw(pdf, itemRect, depth+1); err != nil {
@@ -111,10 +137,10 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 
 	return nil
 }
-func (b *Box) getContentSize(pdf *gopdf.GoPdf) (*size, error) {
+func (b *Box) getContentSize(pdf *gopdf.GoPdf, _ float64) (*size, error) {
 	cs := &size{}
 	for _, item := range b.Items {
-		ips, err := item.getPreferredSize(pdf)
+		ips, err := item.getPreferredSize(pdf, -1)
 		if err != nil {
 			return nil, err
 		}

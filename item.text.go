@@ -73,14 +73,13 @@ func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 		return nil
 	}
 
-	lines, err := pdf.SplitTextWithWordWrap(t.Text, r.w)
+	lines, err := pdf.SplitText(t.Text, r.w)
 	if err != nil {
-		return errors.Wrap(err, "splitTextWithWordWrap")
+		return errors.Wrap(err, "splitText")
 	}
 
 	for _, line := range lines {
 		opt := gopdf.CellOption{}
-
 		switch t.Align {
 		case TextAlignBegin:
 			opt.Align = gopdf.Left
@@ -93,20 +92,23 @@ func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 		if err := pdf.MultiCellWithOption(&gopdf.Rect{W: r.w, H: r.h}, line, opt); err != nil {
 			return errors.Wrap(err, "multiCell")
 		}
-		if t.LineHeight != 0 && t.LineHeight != 1 {
-			pdf.Br((t.LineHeight - 1) * t.FontSize)
-			pdf.SetX(r.x)
-		}
+		pdf.Br((t.LineHeight - 1) * t.FontSize)
+		pdf.SetX(r.x)
 	}
 
 	return nil
 }
-func (t *Text) getContentSize(pdf *gopdf.GoPdf) (*size, error) {
+
+func (t *Text) getContentSize(pdf *gopdf.GoPdf, width float64) (*size, error) {
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
 		return nil, err
 	}
 
-	lines, err := pdf.SplitTextWithWordWrap(t.Text, 10000000)
+	if width < 0 { // 負の場合、幅が制限されないときのサイズを調べる
+		width = 10000000
+	}
+
+	lines, err := pdf.SplitText(t.Text, width)
 	if err != nil {
 		return nil, err
 	}
@@ -124,6 +126,7 @@ func (t *Text) getContentSize(pdf *gopdf.GoPdf) (*size, error) {
 			cs.w = w
 		}
 	}
+
 	return cs, nil
 }
 

@@ -20,7 +20,7 @@ var (
 
 type FlexItem interface {
 	draw(pdf *gopdf.GoPdf, r rect, depth int) error
-	getPreferredSize(*gopdf.GoPdf) (*size, error)
+	getPreferredSize(pdf *gopdf.GoPdf, width float64) (*size, error)
 	getFlexGrow() float64
 }
 

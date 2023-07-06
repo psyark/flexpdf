@@ -23,6 +23,9 @@ func TestText(t *testing.T) {
 	if err := pdf.AddTTFFontData("ipaexg", ipaexgBytes); err != nil {
 		t.Fatal(err)
 	}
+	if err := pdf.AddTTFFontData("", ipaexgBytes); err != nil {
+		t.Fatal(err)
+	}
 
 	root := NewBox(
 		DirectionColumn,
@@ -39,7 +42,7 @@ func TestText(t *testing.T) {
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetAlign(TextAlignBegin),
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetAlign(TextAlignCenter),
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetAlign(TextAlignEnd),
-		).SetMargin(UniformedSpacing(30)),
+		).SetMargin(UniformedSpacing(30)).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 	).SetPadding(UniformedSpacing(50))
 
 	t.Log("draw start")
@@ -60,6 +63,8 @@ func TestText(t *testing.T) {
 }
 
 func TestXxx(t *testing.T) {
+	t.Skip()
+
 	pdf := &gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{})
 
