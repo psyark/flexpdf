@@ -21,6 +21,11 @@ type Text struct {
 	LineHeight float64
 }
 
+func (t *Text) SetLineHeight(lineHeight float64) *Text {
+	t.LineHeight = lineHeight
+	return t
+}
+
 func NewText(family string, size float64, text string) *Text {
 	t := &Text{
 		FontFamily: family,
