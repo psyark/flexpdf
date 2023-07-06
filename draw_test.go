@@ -28,10 +28,10 @@ func TestText(t *testing.T) {
 		DirectionColumn,
 		NewBox(
 			DirectionRow,
-			NewText("ipaexg", 30, "Text"),
-			NewText("ipaexg", 30, "Text").SetMargin(UniformedSpacing(5)),
-			NewText("ipaexg", 30, "Text").SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
-			NewText("ipaexg", 30, "Text").SetPadding(UniformedSpacing(5)),
+			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
+			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(UniformedSpacing(5)),
+			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
+			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetPadding(UniformedSpacing(5)),
 		),
 	).SetPadding(UniformedSpacing(50))
 
