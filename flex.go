@@ -56,3 +56,7 @@ type Spacing struct {
 	Bottom float64
 	Left   float64
 }
+
+func UniformedSpacing(width float64) Spacing {
+	return Spacing{width, width, width, width}
+}

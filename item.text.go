@@ -26,23 +26,14 @@ func NewText(family string, size float64, text string) *Text {
 		FontFamily: family,
 		FontSize:   size,
 		Text:       text,
+		LineHeight: 1,
 	}
 	t.flexItemCommon.init(t)
 	return t
 }
 
-func (t *Text) draw(pdf *gopdf.GoPdf, r rect, depth int) error {
+func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 	log.Printf("%sText.draw(r=%v, t=%q)\n", strings.Repeat("  ", depth), r, t.Text)
-
-	// 背景色
-	if t.BackgroundColor != nil && r.w != 0 && r.h != 0 {
-		if err := setColor(pdf, t.BackgroundColor); err != nil {
-			return err
-		}
-		if err := pdf.Rectangle(r.x, r.y, r.x+r.w, r.y+r.h, "F", 0, 0); err != nil {
-			return errors.Wrap(err, "rectangle")
-		}
-	}
 
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
 		return errors.Wrap(err, "setFont")
@@ -79,13 +70,9 @@ func (t *Text) draw(pdf *gopdf.GoPdf, r rect, depth int) error {
 		}
 	}
 
-	if err := t.Border.draw(pdf, r); err != nil {
-		return err
-	}
-
 	return nil
 }
-func (t *Text) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
+func (t *Text) getContentSize(pdf *gopdf.GoPdf) (*size, error) {
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
 		return nil, err
 	}
@@ -95,11 +82,8 @@ func (t *Text) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 		return nil, err
 	}
 
-	ps := &size{
-		h: t.FontSize * float64(len(lines)),
-	}
-	if t.LineHeight != 0 {
-		ps.h += (t.FontSize * (t.LineHeight - 1)) * float64(len(lines)-1)
+	cs := &size{
+		h: t.FontSize * (float64(len(lines)) + (t.LineHeight-1)*float64(len(lines)-1)),
 	}
 
 	for _, line := range lines {
@@ -107,19 +91,11 @@ func (t *Text) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
 		if err != nil {
 			return nil, err
 		}
-		if ps.w < w {
-			ps.w = w
+		if cs.w < w {
+			cs.w = w
 		}
 	}
-
-	if t.Width >= 0 {
-		ps.w = t.Width
-	}
-	if t.Height >= 0 {
-		ps.h = t.Height
-	}
-
-	return ps, nil
+	return cs, nil
 }
 
 type TextSpan struct {

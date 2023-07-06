@@ -58,7 +58,17 @@ func createJustifyContentExamples(dir1, dir2 Direction) *Box {
 		createJustifyContentExample(dir2, JustifyContentCenter),
 		createJustifyContentExample(dir2, JustifyContentSpaceBetween),
 		createJustifyContentExample(dir2, JustifyContentSpaceAround),
-	).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 2.0)).SetHeight(300)
+	).SetMargin(
+		UniformedSpacing(20),
+	).SetBorder(
+		UniformedBorder(color.Black, BorderStyleDashed, 2.0),
+	).SetPadding(
+		UniformedSpacing(20),
+	).SetHeight(
+		300,
+	).SetBackgroundColor(
+		color.RGBA{0x00, 0x00, 0x00, 0x22},
+	)
 }
 
 func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {

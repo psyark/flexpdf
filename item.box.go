@@ -33,18 +33,8 @@ func (b *Box) SetJustifyContent(jc JustifyContent) *Box {
 	b.JustifyContent = jc
 	return b
 }
-func (b *Box) draw(pdf *gopdf.GoPdf, r rect, depth int) error {
+func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 	log.Printf("%sBox.draw(r=%v, d=%v jc=%v ai=%v)\n", strings.Repeat("  ", depth), r, b.Direction, b.JustifyContent, b.AlignItems)
-
-	// 背景色
-	if b.BackgroundColor != nil && r.w != 0 && r.h != 0 {
-		if err := setColor(pdf, b.BackgroundColor); err != nil {
-			return err
-		}
-		if err := pdf.Rectangle(r.x, r.y, r.x+r.w, r.y+r.h, "F", 0, 0); err != nil {
-			return errors.Wrap(err, "rectangle")
-		}
-	}
 
 	// 子孫
 	itemRect := r
@@ -103,32 +93,22 @@ func (b *Box) draw(pdf *gopdf.GoPdf, r rect, depth int) error {
 		}
 	}
 
-	if err := b.Border.draw(pdf, r); err != nil {
-		return err
-	}
-
 	return nil
 }
-func (b *Box) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
-	ps := &size{}
+func (b *Box) getContentSize(pdf *gopdf.GoPdf) (*size, error) {
+	cs := &size{}
 	for _, item := range b.Items {
 		ips, err := item.getPreferredSize(pdf)
 		if err != nil {
 			return nil, err
 		}
 		if b.Direction.mainAxis() == horizontal {
-			ps.w += ips.w
-			ps.h = math.Max(ps.h, ips.h)
+			cs.w += ips.w
+			cs.h = math.Max(cs.h, ips.h)
 		} else {
-			ps.w = math.Max(ps.w, ips.w)
-			ps.h += ips.h
+			cs.w = math.Max(cs.w, ips.w)
+			cs.h += ips.h
 		}
 	}
-	if b.Width >= 0 {
-		ps.w = b.Width
-	}
-	if b.Height >= 0 {
-		ps.h = b.Height
-	}
-	return ps, nil
+	return cs, nil
 }
