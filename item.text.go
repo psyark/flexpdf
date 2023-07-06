@@ -22,14 +22,12 @@ type Text struct {
 }
 
 func NewText(family string, size float64, text string) *Text {
-	t := &Text{}
-	t.Width = -1
-	t.Height = -1
-
-	t.FontFamily = family
-	t.FontSize = size
-	t.Text = text
-	return t
+	return &Text{
+		flexItemCommon: flexItemCommonDefault,
+		FontFamily:     family,
+		FontSize:       size,
+		Text:           text,
+	}
 }
 func (t *Text) SetWidth(w float64) *Text {
 	t.Width = w

@@ -23,14 +23,11 @@ type Box struct {
 }
 
 func NewBox(dir Direction, items ...FlexItem) *Box {
-	b := &Box{
-		Direction: dir,
-		Items:     items,
+	return &Box{
+		flexItemCommon: flexItemCommonDefault,
+		Direction:      dir,
+		Items:          items,
 	}
-	b.Width = -1
-	b.Height = -1
-	b.FlexShrink = 1
-	return b
 }
 func (b *Box) SetWidth(w float64) *Box {
 	b.Width = w
