@@ -28,6 +28,13 @@ type size struct {
 	h float64
 }
 
+func (s size) add(trbl TRBL[float64]) size {
+	s.w += trbl.Left + trbl.Right
+	s.h += trbl.Top + trbl.Bottom
+	// TODO negative
+	return s
+}
+
 func (s size) getLength(a axis) float64 {
 	if a == horizontal {
 		return s.w

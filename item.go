@@ -88,18 +88,22 @@ func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) er
 	return nil
 }
 func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf) (*size, error) {
-	ps, err := c.self.getContentSize(pdf)
+	psp, err := c.self.getContentSize(pdf)
 	if err != nil {
 		return nil, err
 	}
+
+	ps := *psp
 	if c.Width >= 0 {
 		ps.w = c.Width
 	}
 	if c.Height >= 0 {
 		ps.h = c.Height
 	}
-	ps.w += c.Margin.Right + c.Margin.Left
-	ps.h += c.Margin.Top + c.Margin.Bottom
 
-	return ps, nil
+	for _, space := range []TRBL[float64]{c.Margin, c.Border.Width, c.Padding} {
+		ps = ps.add(space)
+	}
+
+	return &ps, nil
 }

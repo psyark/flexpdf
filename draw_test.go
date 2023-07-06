@@ -16,6 +16,42 @@ var (
 	ipaexmBytes []byte
 )
 
+func TestText(t *testing.T) {
+	pdf := &gopdf.GoPdf{}
+	pdf.Start(gopdf.Config{})
+
+	if err := pdf.AddTTFFontData("ipaexg", ipaexgBytes); err != nil {
+		t.Fatal(err)
+	}
+
+	root := NewBox(
+		DirectionColumn,
+		NewBox(
+			DirectionRow,
+			NewText("ipaexg", 30, "Text"),
+			NewText("ipaexg", 30, "Text").SetMargin(UniformedSpacing(5)),
+			NewText("ipaexg", 30, "Text").SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
+			NewText("ipaexg", 30, "Text").SetPadding(UniformedSpacing(5)),
+		),
+	).SetPadding(UniformedSpacing(50))
+
+	t.Log("draw start")
+	if err := Draw(pdf, root, gopdf.PageSizeA4); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log("draw end")
+	data, err := pdf.GetBytesPdfReturnErr()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log("write start")
+	if err := os.WriteFile("text.pdf", data, 0666); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestXxx(t *testing.T) {
 	pdf := &gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{})
