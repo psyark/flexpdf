@@ -1,7 +1,6 @@
 package flexpdf
 
 import (
-	"image/color"
 	"log"
 	"math"
 	"strings"
@@ -14,7 +13,7 @@ import (
 // Width/Heightが指定してなければ子要素のサイズ(basis=content)となる
 type Box struct {
 	// 共通フィールド
-	flexItemCommon
+	flexItemCommon[Box]
 
 	Direction      Direction
 	JustifyContent JustifyContent
@@ -23,29 +22,11 @@ type Box struct {
 }
 
 func NewBox(dir Direction, items ...FlexItem) *Box {
-	return &Box{
-		flexItemCommon: flexItemCommonDefault,
-		Direction:      dir,
-		Items:          items,
+	b := &Box{
+		Direction: dir,
+		Items:     items,
 	}
-}
-func (b *Box) SetWidth(w float64) *Box {
-	b.Width = w
-	return b
-}
-func (b *Box) SetHeight(h float64) *Box {
-	b.Height = h
-	return b
-}
-func (b *Box) SetSize(w, h float64) *Box {
-	return b.SetWidth(w).SetHeight(h)
-}
-func (b *Box) SetBackgroundColor(c color.Color) *Box {
-	b.BackgroundColor = c
-	return b
-}
-func (b *Box) SetBorder(border Border) *Box {
-	b.Border = border
+	b.flexItemCommon.init(b)
 	return b
 }
 func (b *Box) SetJustifyContent(jc JustifyContent) *Box {

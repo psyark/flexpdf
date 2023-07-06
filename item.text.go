@@ -12,7 +12,7 @@ import (
 // Text はテキストを扱うエレメントです
 // TODO family, size, color, text は Spanのスライスにする
 type Text struct {
-	flexItemCommon
+	flexItemCommon[Text]
 
 	FontFamily string
 	FontSize   float64
@@ -22,26 +22,12 @@ type Text struct {
 }
 
 func NewText(family string, size float64, text string) *Text {
-	return &Text{
-		flexItemCommon: flexItemCommonDefault,
-		FontFamily:     family,
-		FontSize:       size,
-		Text:           text,
+	t := &Text{
+		FontFamily: family,
+		FontSize:   size,
+		Text:       text,
 	}
-}
-func (t *Text) SetWidth(w float64) *Text {
-	t.Width = w
-	return t
-}
-func (t *Text) SetHeight(h float64) *Text {
-	t.Height = h
-	return t
-}
-func (t *Text) SetSize(w, h float64) *Text {
-	return t.SetWidth(w).SetHeight(h)
-}
-func (t *Text) SetBackgroundColor(c color.Color) *Text {
-	t.BackgroundColor = c
+	t.flexItemCommon.init(t)
 	return t
 }
 

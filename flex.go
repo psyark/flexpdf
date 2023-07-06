@@ -49,3 +49,10 @@ const (
 	AlignItemsCenter    AlignItems = "center"
 	AlignItemsStretch   AlignItems = "stretch"
 )
+
+type Spacing struct {
+	Top    float64
+	Right  float64
+	Bottom float64
+	Left   float64
+}
