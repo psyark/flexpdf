@@ -61,7 +61,7 @@ func createJustifyContentExamples(dir1, dir2 Direction) *Box {
 	).SetMargin(
 		UniformedSpacing(20),
 	).SetBorder(
-		UniformedBorder(color.Black, BorderStyleDashed, 2.0),
+		UniformedBorder(color.Black, BorderStyleDashed, 10),
 	).SetPadding(
 		UniformedSpacing(20),
 	).SetHeight(
