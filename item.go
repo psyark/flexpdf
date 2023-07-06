@@ -21,8 +21,8 @@ type flexItemCommon[T flexItemExtender] struct {
 	FlexShrink      float64
 	BackgroundColor color.Color
 	Border          Border
-	Margin          Spacing
-	Padding         Spacing
+	Margin          TRBL[float64]
+	Padding         TRBL[float64]
 }
 
 func (c *flexItemCommon[T]) init(self T) {
@@ -56,31 +56,19 @@ func (c *flexItemCommon[T]) SetBorder(border Border) T {
 	c.Border = border
 	return c.self
 }
-func (c *flexItemCommon[T]) SetMargin(margin Spacing) T {
+func (c *flexItemCommon[T]) SetMargin(margin TRBL[float64]) T {
 	c.Margin = margin
 	return c.self
 }
-func (c *flexItemCommon[T]) SetPadding(padding Spacing) T {
+func (c *flexItemCommon[T]) SetPadding(padding TRBL[float64]) T {
 	c.Padding = padding
 	return c.self
 }
 
 func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) error {
-	borderBox := marginBox
-	borderBox.x += c.Margin.Left
-	borderBox.w -= c.Margin.Left + c.Margin.Right
-	borderBox.y += c.Margin.Top
-	borderBox.h -= c.Margin.Top + c.Margin.Bottom
-	paddingBox := borderBox
-	paddingBox.x += c.Border.Left.Width
-	paddingBox.w -= c.Border.Left.Width + c.Border.Right.Width
-	paddingBox.y += c.Border.Top.Width
-	paddingBox.h -= c.Border.Top.Width + c.Border.Bottom.Width
-	contentBox := paddingBox
-	contentBox.x += c.Padding.Left
-	contentBox.w -= c.Padding.Left + c.Padding.Right
-	contentBox.y += c.Padding.Top
-	contentBox.h -= c.Padding.Top + c.Padding.Bottom
+	borderBox := marginBox.shrink(c.Margin)
+	paddingBox := borderBox.shrink(c.Border.Width)
+	contentBox := paddingBox.shrink(c.Padding)
 
 	// 背景色
 	if c.BackgroundColor != nil && borderBox.w >= 0 && borderBox.h >= 0 {

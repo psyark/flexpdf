@@ -15,46 +15,42 @@ const (
 )
 
 type Border struct {
-	Top    BorderPart
-	Right  BorderPart
-	Bottom BorderPart
-	Left   BorderPart
+	Color TRBL[color.Color]
+	Width TRBL[float64]
+	Style TRBL[BorderStyle]
 }
 
-func UniformedBorder(co color.Color, style BorderStyle, width float64) Border {
-	p := BorderPart{co, width, style}
-	return Border{p, p, p, p}
+func UniformedBorder(col color.Color, style BorderStyle, width float64) Border {
+	return Border{
+		Color: TRBL[color.Color]{col, col, col, col},
+		Width: TRBL[float64]{width, width, width, width},
+		Style: TRBL[BorderStyle]{style, style, style, style},
+	}
 }
 
 func (b *Border) draw(pdf *gopdf.GoPdf, r rect) error {
-	if err := b.Top.draw(pdf, r.x, r.y, r.x+r.w, r.y); err != nil {
+	if err := b.drawPart(pdf, r.x, r.y, r.x+r.w, r.y, b.Color.Top, b.Width.Top, b.Style.Top); err != nil {
 		return err
 	}
-	if err := b.Right.draw(pdf, r.x+r.w, r.y, r.x+r.w, r.y+r.h); err != nil {
+	if err := b.drawPart(pdf, r.x+r.w, r.y, r.x+r.w, r.y+r.h, b.Color.Right, b.Width.Right, b.Style.Right); err != nil {
 		return err
 	}
-	if err := b.Bottom.draw(pdf, r.x, r.y+r.h, r.x+r.w, r.y+r.h); err != nil {
+	if err := b.drawPart(pdf, r.x, r.y+r.h, r.x+r.w, r.y+r.h, b.Color.Bottom, b.Width.Bottom, b.Style.Bottom); err != nil {
 		return err
 	}
-	if err := b.Left.draw(pdf, r.x, r.y, r.x, r.y+r.h); err != nil {
+	if err := b.drawPart(pdf, r.x, r.y, r.x, r.y+r.h, b.Color.Left, b.Width.Left, b.Style.Left); err != nil {
 		return err
 	}
 	return nil
 }
 
-type BorderPart struct {
-	Color color.Color
-	Width float64
-	Style BorderStyle
-}
-
-func (p *BorderPart) draw(pdf *gopdf.GoPdf, x1, y1, x2, y2 float64) error {
-	if p.Color != nil && p.Width > 0 {
-		if err := setColor(pdf, p.Color); err != nil {
+func (*Border) drawPart(pdf *gopdf.GoPdf, x1, y1, x2, y2 float64, col color.Color, width float64, style BorderStyle) error {
+	if col != nil && width > 0 {
+		if err := setColor(pdf, col); err != nil {
 			return err
 		}
 
-		switch p.Style {
+		switch style {
 		case BorderStyleDashed:
 			pdf.SetLineType("dashed")
 		case BorderStyleDotted:
@@ -62,10 +58,10 @@ func (p *BorderPart) draw(pdf *gopdf.GoPdf, x1, y1, x2, y2 float64) error {
 		case BorderStyleSolid:
 			pdf.SetLineType("")
 		default:
-			panic(p.Style)
+			panic(style)
 		}
 
-		pdf.SetLineWidth(p.Width)
+		pdf.SetLineWidth(width)
 		pdf.Line(x1, y1, x2, y2)
 	}
 	return nil

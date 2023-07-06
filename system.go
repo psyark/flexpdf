@@ -47,6 +47,14 @@ func (s rect) getLength(a axis) float64 {
 		return s.h
 	}
 }
+func (s rect) shrink(trbl TRBL[float64]) rect {
+	s.x += trbl.Left
+	s.w -= trbl.Left + trbl.Right
+	s.y += trbl.Top
+	s.h -= trbl.Top + trbl.Bottom
+	// TODO negative
+	return s
+}
 
 func setColor(pdf *gopdf.GoPdf, col color.Color) error {
 	r, g, b, a := col.RGBA()
@@ -58,4 +66,11 @@ func setColor(pdf *gopdf.GoPdf, col color.Color) error {
 
 	pdf.SetFillColor(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 	return nil
+}
+
+type TRBL[T any] struct {
+	Top    T
+	Right  T
+	Bottom T
+	Left   T
 }
