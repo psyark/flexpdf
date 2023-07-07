@@ -49,7 +49,3 @@ const (
 	AlignItemsCenter    AlignItems = "center"
 	AlignItemsStretch   AlignItems = "stretch"
 )
-
-func UniformedSpacing(width float64) Spacing {
-	return Spacing{width, width, width, width}
-}

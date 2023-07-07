@@ -32,27 +32,27 @@ func TestText(t *testing.T) {
 		NewBox(
 			DirectionRow,
 			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
-			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(UniformedSpacing(5)),
+			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(5),
 			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
-			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetPadding(UniformedSpacing(5)),
-		).SetMargin(UniformedSpacing(30)),
+			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetPadding(5),
+		).SetMargin(30),
 		NewBox(
 			DirectionRow,
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetAlign(TextAlignBegin),
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetAlign(TextAlignCenter),
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetAlign(TextAlignEnd),
-		).SetMargin(UniformedSpacing(30)).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
+		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 		NewBox(
 			DirectionRow,
-			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(UniformedSpacing(10)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
-		).SetMargin(UniformedSpacing(30)).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
+			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 		NewBox(
 			DirectionRow,
-			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(UniformedSpacing(10)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
-			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(UniformedSpacing(10)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
-		).SetMargin(UniformedSpacing(30)).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
-	).SetPadding(UniformedSpacing(50))
+			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
+	).SetPadding(50)
 
 	t.Log("draw start")
 	if err := Draw(pdf, root, gopdf.PageSizeA4); err != nil {
@@ -111,11 +111,11 @@ func createJustifyContentExamples(dir1, dir2 Direction) *Box {
 		createJustifyContentExample(dir2, JustifyContentSpaceBetween),
 		createJustifyContentExample(dir2, JustifyContentSpaceAround),
 	).SetMargin(
-		UniformedSpacing(20),
+		20,
 	).SetBorder(
 		UniformedBorder(color.Black, BorderStyleDashed, 10),
 	).SetPadding(
-		UniformedSpacing(20),
+		20,
 	).SetHeight(
 		0,
 	).SetFlexGrow(1).SetBackgroundColor(

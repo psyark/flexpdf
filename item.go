@@ -67,12 +67,46 @@ func (c *flexItemCommon[T]) SetBorder(border Border) T {
 	c.Border = border
 	return c.self
 }
-func (c *flexItemCommon[T]) SetMargin(margin Spacing) T {
-	c.Margin = margin
+func (*flexItemCommon[T]) parseSpacing(values ...float64) Spacing {
+	switch len(values) {
+	case 0:
+		return Spacing{}
+	case 1: // TRBL
+		return Spacing{
+			Top:    values[0],
+			Right:  values[0],
+			Bottom: values[0],
+			Left:   values[0],
+		}
+	case 2: // TB | RL
+		return Spacing{
+			Top:    values[0],
+			Bottom: values[0],
+			Right:  values[1],
+			Left:   values[1],
+		}
+	case 3: // T | RL | B
+		return Spacing{
+			Top:    values[0],
+			Right:  values[1],
+			Left:   values[1],
+			Bottom: values[2],
+		}
+	default: // T | R | B | L
+		return Spacing{
+			Top:    values[0],
+			Right:  values[1],
+			Bottom: values[2],
+			Left:   values[3],
+		}
+	}
+}
+func (c *flexItemCommon[T]) SetMargin(values ...float64) T {
+	c.Margin = c.parseSpacing(values...)
 	return c.self
 }
-func (c *flexItemCommon[T]) SetPadding(padding Spacing) T {
-	c.Padding = padding
+func (c *flexItemCommon[T]) SetPadding(values ...float64) T {
+	c.Padding = c.parseSpacing(values...)
 	return c.self
 }
 
