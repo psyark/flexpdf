@@ -37,19 +37,22 @@ func (b *Box) SetJustifyContent(jc JustifyContent) *Box {
 func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 	log.Printf("%sBox.draw(r=%v, d=%v jc=%v ai=%v)\n", strings.Repeat("  ", depth), r, b.Direction, b.JustifyContent, b.AlignItems)
 
+	mainAxis := b.Direction.mainAxis()
+	counterAxis := !mainAxis
+
 	// 子孫
 	itemRect := r
-	prefSizes := make([]*size, len(b.Items))
+	prefSizes := make([]size, len(b.Items))
 
 	var spacing float64
 	{
 		var growing, growTotal float64
-		mainAxisRemains := r.getLength(b.Direction.mainAxis())
+		mainAxisRemains := r.getLength(mainAxis)
 
 		// 1パス目は自然なサイズ
 		for i, item := range b.Items {
 			maxWidth := -1.0 // -1 -> 自然なサイズ
-			if b.Direction.mainAxis() == vertical {
+			if mainAxis == vertical {
 				maxWidth = r.w
 			}
 			ps, err := item.getPreferredSize(pdf, maxWidth)
@@ -58,7 +61,7 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 			}
 			growTotal += item.getFlexGrow()
 			prefSizes[i] = ps
-			mainAxisRemains -= ps.getLength(b.Direction.mainAxis())
+			mainAxisRemains -= ps.get(mainAxis)
 		}
 
 		if mainAxisRemains < 0 {
@@ -72,33 +75,45 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 			spacing = mainAxisRemains - growing
 		}
 
+		log.Println(mainAxisRemains, growTotal, growing, spacing)
+
 		// 2パス目は幅を制限したときのサイズ
 		for i, item := range b.Items {
 			ps := prefSizes[i]
+
+			// グロー
 			if growTotal != 0 {
-				ps.w += growing * item.getFlexGrow() / growTotal
+				ps = ps.update(mainAxis, func(f float64) float64 {
+					return f + growing*item.getFlexGrow()/growTotal
+				})
 			}
 
-			ps2, err := item.getPreferredSize(pdf, ps.w) // 指定したサイズ
-			if err != nil {
-				return err
+			if mainAxis == horizontal {
+				ps2, err := item.getPreferredSize(pdf, ps.w) // 指定したサイズ
+				if err != nil {
+					return err
+				}
+				ps.h = ps2.h // 高さだけ更新
 			}
-			ps.h = ps2.h // 高さだけ更新
+
 			prefSizes[i] = ps
 		}
 	}
 
-	if b.Direction.mainAxis() == horizontal {
-		switch b.JustifyContent {
-		case JustifyContentFlexEnd:
-			itemRect.x += spacing
-		case JustifyContentCenter:
-			itemRect.x += spacing / 2
-		case JustifyContentSpaceAround:
-			itemRect.x += spacing / float64(len(b.Items)*2)
-		}
-	} else {
-		// TODO
+	// 開始位置
+	switch b.JustifyContent {
+	case JustifyContentFlexEnd:
+		itemRect = itemRect.updatePos(mainAxis, func(v float64) float64 {
+			return v + spacing
+		})
+	case JustifyContentCenter:
+		itemRect = itemRect.updatePos(mainAxis, func(v float64) float64 {
+			return v + spacing/2
+		})
+	case JustifyContentSpaceAround:
+		itemRect = itemRect.updatePos(mainAxis, func(v float64) float64 {
+			return v + spacing/float64(len(b.Items)*2)
+		})
 	}
 
 	for i, item := range b.Items {
@@ -107,42 +122,40 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 		itemRect.w = ps.w
 		itemRect.h = ps.h
 
-		if b.Direction.mainAxis() == horizontal {
-			if b.AlignItems == AlignItemsStretch {
-				itemRect.h = r.h
-			}
-		} else {
-			if b.AlignItems == AlignItemsStretch {
-				itemRect.w = r.w
-			}
+		// ストレッチ
+		if b.AlignItems == AlignItemsStretch {
+			itemRect = itemRect.setSize(counterAxis, r.getSize(counterAxis))
 		}
 
+		// 描画
 		if err := item.draw(pdf, itemRect, depth+1); err != nil {
 			return errors.Wrap(err, "item.draw")
 		}
 
-		if b.Direction.mainAxis() == horizontal {
-			itemRect.x += ps.w
-			switch b.JustifyContent {
-			case JustifyContentSpaceBetween:
-				itemRect.x += spacing / float64(len(b.Items)-1)
-			case JustifyContentSpaceAround:
-				itemRect.x += spacing / float64(len(b.Items))
-			}
-		} else {
-			// TODO
-			itemRect.y += ps.h
+		// アイテム間の余白
+		itemRect = itemRect.updatePos(mainAxis, func(v float64) float64 {
+			return v + ps.get(mainAxis)
+		})
+		switch b.JustifyContent {
+		case JustifyContentSpaceBetween:
+			itemRect = itemRect.updatePos(mainAxis, func(v float64) float64 {
+				return v + spacing/float64(len(b.Items)-1)
+			})
+		case JustifyContentSpaceAround:
+			itemRect = itemRect.updatePos(mainAxis, func(v float64) float64 {
+				return v + spacing/float64(len(b.Items))
+			})
 		}
 	}
 
 	return nil
 }
-func (b *Box) getContentSize(pdf *gopdf.GoPdf, _ float64) (*size, error) {
-	cs := &size{}
+func (b *Box) getContentSize(pdf *gopdf.GoPdf, _ float64) (size, error) {
+	cs := size{}
 	for _, item := range b.Items {
 		ips, err := item.getPreferredSize(pdf, -1)
 		if err != nil {
-			return nil, err
+			return size{}, err
 		}
 		if b.Direction.mainAxis() == horizontal {
 			cs.w += ips.w

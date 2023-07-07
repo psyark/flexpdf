@@ -20,48 +20,8 @@ var (
 
 type FlexItem interface {
 	draw(pdf *gopdf.GoPdf, r rect, depth int) error
-	getPreferredSize(pdf *gopdf.GoPdf, width float64) (*size, error)
+	getPreferredSize(pdf *gopdf.GoPdf, width float64) (size, error)
 	getFlexGrow() float64
-}
-
-type size struct {
-	w float64
-	h float64
-}
-
-func (s size) add(spacing Spacing) size {
-	s.w += spacing.Left + spacing.Right
-	s.h += spacing.Top + spacing.Bottom
-	// TODO negative
-	return s
-}
-
-func (s size) getLength(a axis) float64 {
-	if a == horizontal {
-		return s.w
-	} else {
-		return s.h
-	}
-}
-
-type rect struct {
-	x, y, w, h float64
-}
-
-func (s rect) getLength(a axis) float64 {
-	if a == horizontal {
-		return s.w
-	} else {
-		return s.h
-	}
-}
-func (s rect) shrink(spacing Spacing) rect {
-	s.x += spacing.Left
-	s.w -= spacing.Left + spacing.Right
-	s.y += spacing.Top
-	s.h -= spacing.Top + spacing.Bottom
-	// TODO negative
-	return s
 }
 
 func setColor(pdf *gopdf.GoPdf, col color.Color) error {

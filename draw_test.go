@@ -43,6 +43,15 @@ func TestText(t *testing.T) {
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetAlign(TextAlignCenter),
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetAlign(TextAlignEnd),
 		).SetMargin(UniformedSpacing(30)).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
+		NewBox(
+			DirectionRow,
+			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(UniformedSpacing(10)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+		).SetMargin(UniformedSpacing(30)).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
+		NewBox(
+			DirectionRow,
+			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(UniformedSpacing(10)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(UniformedSpacing(10)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+		).SetMargin(UniformedSpacing(30)).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 	).SetPadding(UniformedSpacing(50))
 
 	t.Log("draw start")
@@ -63,8 +72,6 @@ func TestText(t *testing.T) {
 }
 
 func TestXxx(t *testing.T) {
-	t.Skip()
-
 	pdf := &gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{})
 
@@ -81,18 +88,15 @@ func TestXxx(t *testing.T) {
 		createJustifyContentExamples(DirectionRow, DirectionColumn),
 	)
 
-	t.Log("draw start")
 	if err := Draw(pdf, root, gopdf.PageSizeA4); err != nil {
 		t.Fatal(err)
 	}
 
-	t.Log("draw end")
 	data, err := pdf.GetBytesPdfReturnErr()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Log("write start")
 	if err := os.WriteFile("out.pdf", data, 0666); err != nil {
 		t.Fatal(err)
 	}
@@ -113,27 +117,27 @@ func createJustifyContentExamples(dir1, dir2 Direction) *Box {
 	).SetPadding(
 		UniformedSpacing(20),
 	).SetHeight(
-		300,
-	).SetBackgroundColor(
+		0,
+	).SetFlexGrow(1).SetBackgroundColor(
 		color.RGBA{0x00, 0x00, 0x00, 0x22},
-	)
+	).SetJustifyContent(JustifyContentSpaceBetween)
 }
 
 func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {
 	return NewBox(
 		DirectionColumn,
-		NewText("ipaexg", 20, string(jc)+":"),
+		NewText("ipaexg", 14, string(jc)),
 		NewBox(
 			dir,
-			NewText("ipaexg", 24, "あいうえお").SetSize(80, 40).SetBackgroundColor(color.RGBA{0xFF, 0xCC, 0xCC, 0xFF}),
-			NewText("ipaexg", 24, "かきくけこ").SetBackgroundColor(color.RGBA{0xCC, 0xFF, 0xCC, 0xFF}),
-			NewText("ipaexg", 24, "さしすせそ たちつてと").SetBackgroundColor(color.RGBA{0xCC, 0xCC, 0xFF, 0xFF}),
+			NewText("ipaexg", 15, "A").SetSize(20, 20).SetBackgroundColor(color.RGBA{0xFF, 0xCC, 0xCC, 0xFF}),
+			NewText("ipaexg", 15, "B").SetSize(20, 20).SetBackgroundColor(color.RGBA{0xCC, 0xFF, 0xCC, 0xFF}),
+			NewText("ipaexg", 15, "C").SetSize(20, 20).SetBackgroundColor(color.RGBA{0xCC, 0xCC, 0xFF, 0xFF}),
 		).SetBackgroundColor(
 			color.RGBA{0x88, 0x88, 0x88, 0xFF},
 		).SetBorder(
 			UniformedBorder(color.RGBA{A: 0xFF}, BorderStyleSolid, 2),
 		).SetJustifyContent(
 			jc,
-		),
+		).SetFlexGrow(1),
 	)
 }

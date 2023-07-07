@@ -10,7 +10,7 @@ import (
 type flexItemExtender interface {
 	FlexItem
 	drawContent(*gopdf.GoPdf, rect, int) error
-	getContentSize(pdf *gopdf.GoPdf, width float64) (*size, error)
+	getContentSize(pdf *gopdf.GoPdf, width float64) (size, error)
 }
 
 type flexItemCommon[T flexItemExtender] struct {
@@ -98,13 +98,12 @@ func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) er
 	}
 	return nil
 }
-func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf, width float64) (*size, error) {
-	psp, err := c.self.getContentSize(pdf, width)
+func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf, width float64) (size, error) {
+	ps, err := c.self.getContentSize(pdf, width)
 	if err != nil {
-		return nil, err
+		return size{}, err
 	}
 
-	ps := *psp
 	if c.Width >= 0 {
 		ps.w = c.Width
 	}
@@ -116,5 +115,5 @@ func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf, width float64) (*
 		ps = ps.add(space)
 	}
 
-	return &ps, nil
+	return ps, nil
 }

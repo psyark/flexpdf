@@ -99,9 +99,9 @@ func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 	return nil
 }
 
-func (t *Text) getContentSize(pdf *gopdf.GoPdf, width float64) (*size, error) {
+func (t *Text) getContentSize(pdf *gopdf.GoPdf, width float64) (size, error) {
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
-		return nil, err
+		return size{}, err
 	}
 
 	if width < 0 { // 負の場合、幅が制限されないときのサイズを調べる
@@ -110,17 +110,17 @@ func (t *Text) getContentSize(pdf *gopdf.GoPdf, width float64) (*size, error) {
 
 	lines, err := pdf.SplitText(t.Text, width)
 	if err != nil {
-		return nil, err
+		return size{}, err
 	}
 
-	cs := &size{
+	cs := size{
 		h: t.FontSize * (float64(len(lines)) + (t.LineHeight-1)*float64(len(lines)-1)),
 	}
 
 	for _, line := range lines {
 		w, err := pdf.MeasureTextWidth(line)
 		if err != nil {
-			return nil, err
+			return size{}, err
 		}
 		if cs.w < w {
 			cs.w = w
