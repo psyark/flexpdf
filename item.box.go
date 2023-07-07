@@ -34,6 +34,10 @@ func (b *Box) SetJustifyContent(jc JustifyContent) *Box {
 	b.JustifyContent = jc
 	return b
 }
+func (b *Box) SetAlignItems(aa AlignItems) *Box {
+	b.AlignItems = aa
+	return b
+}
 func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 	log.Printf("%sBox.draw(r=%v, d=%v jc=%v ai=%v)\n", strings.Repeat("  ", depth), r, b.Direction, b.JustifyContent, b.AlignItems)
 
