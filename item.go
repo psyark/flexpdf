@@ -3,7 +3,6 @@ package flexpdf
 import (
 	"image/color"
 
-	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
 )
 
@@ -110,7 +109,9 @@ func (c *flexItemCommon[T]) SetPadding(values ...float64) T {
 	return c.self
 }
 
-func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) error {
+func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) (err error) {
+	defer wrap(&err, "common.draw")
+
 	borderBox := marginBox.shrink(c.Margin)
 	paddingBox := borderBox.shrink(c.Border.Width)
 	contentBox := paddingBox.shrink(c.Padding)
@@ -121,7 +122,7 @@ func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) er
 			return err
 		}
 		if err := pdf.Rectangle(borderBox.x, borderBox.y, borderBox.x+borderBox.w, borderBox.y+borderBox.h, "F", 0, 0); err != nil {
-			return errors.Wrap(err, "rectangle")
+			return err
 		}
 	}
 	if err := c.self.drawContent(pdf, contentBox, depth); err != nil {

@@ -3,7 +3,6 @@ package flexpdf
 import (
 	"math"
 
-	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
 )
 
@@ -43,7 +42,9 @@ func (b *Box) SetAlignItems(aa AlignItems) *Box {
 	b.AlignItems = aa
 	return b
 }
-func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
+func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) (err error) {
+	defer wrap(&err, "box.drawContent")
+
 	// log.Printf("%sBox.draw(r=%v, d=%v jc=%v ai=%v)\n", strings.Repeat("  ", depth), r, b.Direction, b.JustifyContent, b.AlignItems)
 
 	mainAxis := b.Direction.mainAxis()
@@ -138,7 +139,7 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 
 		// 描画
 		if err := item.draw(pdf, itemRect, depth+1); err != nil {
-			return errors.Wrap(err, "item.draw")
+			return err
 		}
 
 		// アイテム間の余白

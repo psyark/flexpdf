@@ -1,6 +1,7 @@
 package flexpdf
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/signintech/gopdf"
@@ -44,3 +45,9 @@ type TRBL[T any] struct {
 }
 
 type Spacing TRBL[float64]
+
+func wrap(errp *error, format string, args ...any) {
+	if *errp != nil {
+		*errp = fmt.Errorf("%s: %w", fmt.Sprintf(format, args...), *errp)
+	}
+}

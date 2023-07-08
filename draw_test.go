@@ -6,6 +6,7 @@ package flexpdf
 import (
 	"bytes"
 	_ "embed"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -14,7 +15,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
@@ -79,24 +79,40 @@ func TestDraw(t *testing.T) {
 
 var cases = map[string]*Box{
 	"text": NewColumnBox(
+		// 1 run for 1 text
 		NewRowBox(
-			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
-			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(5),
-			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
-			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetPadding(5),
+			NewText(NewRun("normal").SetFontSize(30)),
+			NewText(NewRun("size").SetFontSize(60)),
+			NewText(NewRun("color").SetFontSize(30).SetColor(color.RGBA{R: 0xFF, A: 0xFF})),
+			NewText(NewRun("family").SetFontSize(30).SetFontFamily("ipaexm")),
+		),
+		// many run for 1 text
+		NewRowBox(
+			NewText(
+				NewRun("normal").SetFontSize(30),
+				NewRun("size").SetFontSize(60),
+				NewRun("color").SetFontSize(30).SetColor(color.RGBA{R: 0xFF, A: 0xFF}),
+				NewRun("family").SetFontSize(30).SetFontFamily("ipaexm"),
+			),
+		),
+		NewRowBox(
+			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
+			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(5),
+			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
+			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetPadding(5),
 		).SetMargin(30),
 		NewRowBox(
-			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
-			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetAlign(TextAlignBegin),
-			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetAlign(TextAlignCenter),
-			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetAlign(TextAlignEnd),
+			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
+			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetAlign(TextAlignBegin),
+			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetAlign(TextAlignCenter),
+			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetAlign(TextAlignEnd),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 		NewRowBox(
-			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 		NewRowBox(
-			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
-			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 	).SetPadding(50),
 
@@ -106,7 +122,9 @@ var cases = map[string]*Box{
 	),
 }
 
-func compareImage(pdfBytes []byte, fileName string) error {
+func compareImage(pdfBytes []byte, fileName string) (err error) {
+	defer wrap(&err, "compareImage")
+
 	images, err := getImages(pdfBytes)
 	if err != nil {
 		return err
@@ -128,9 +146,12 @@ func compareImage(pdfBytes []byte, fileName string) error {
 	}
 
 	bytesWant, err := os.ReadFile(fileName)
-	if err == os.ErrNotExist {
+
+	if errors.Is(err, os.ErrNotExist) {
 		// 存在しない場合は保存する。比較はしない
 		return os.WriteFile(fileName, bytesGot, 0666)
+	} else if err != nil {
+		return err
 	}
 
 	diffFileName := strings.TrimSuffix(fileName, ".png") + "_diff.png"
@@ -168,25 +189,25 @@ func compareImage(pdfBytes []byte, fileName string) error {
 			return err
 		}
 
-		return errors.Wrap(errUnmatch, fileName)
+		return fmt.Errorf("%s: %w", fileName, errUnmatch)
 	}
 }
 
-func getImages(pdfBytes []byte) ([]image.Image, error) {
+func getImages(pdfBytes []byte) (images []image.Image, err error) {
+	defer wrap(&err, "getImages")
+
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
 	if err := mw.SetResolution(150, 150); err != nil {
-		return nil, errors.Wrap(err, "set resolution")
+		return nil, err
 	}
 	if err := mw.ReadImageBlob(pdfBytes); err != nil {
-		return nil, errors.Wrap(err, "read image")
+		return nil, err
 	}
 	if err := mw.SetImageFormat("png"); err != nil {
-		return nil, errors.Wrap(err, "set image format")
+		return nil, err
 	}
-
-	images := []image.Image{}
 
 	for i := 0; i < int(mw.GetNumberImages()); i++ {
 		if !mw.SetIteratorIndex(i) {
@@ -196,7 +217,7 @@ func getImages(pdfBytes []byte) ([]image.Image, error) {
 		imageBytes := mw.GetImageBlob()
 		img, err := png.Decode(bytes.NewReader(imageBytes))
 		if err != nil {
-			return nil, errors.Wrap(err, "png decode")
+			return nil, err
 		}
 
 		images = append(images, img)
@@ -228,12 +249,12 @@ func createJustifyContentExamples(dir1, dir2 Direction) *Box {
 
 func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {
 	return NewColumnBox(
-		NewText("ipaexg", 14, string(jc)),
+		NewText(NewRun(string(jc)).SetFontSize(14)),
 		NewBox(
 			dir,
-			NewText("ipaexg", 15, "A").SetSize(20, 20).SetBackgroundColor(color.RGBA{0xFF, 0xCC, 0xCC, 0xFF}),
-			NewText("ipaexg", 15, "B").SetSize(20, 20).SetBackgroundColor(color.RGBA{0xCC, 0xFF, 0xCC, 0xFF}),
-			NewText("ipaexg", 15, "C").SetSize(20, 20).SetBackgroundColor(color.RGBA{0xCC, 0xCC, 0xFF, 0xFF}),
+			NewText(NewRun("A").SetFontSize(15)).SetSize(20, 20).SetBackgroundColor(color.RGBA{0xFF, 0xCC, 0xCC, 0xFF}),
+			NewText(NewRun("B").SetFontSize(15)).SetSize(20, 20).SetBackgroundColor(color.RGBA{0xCC, 0xFF, 0xCC, 0xFF}),
+			NewText(NewRun("C").SetFontSize(15)).SetSize(20, 20).SetBackgroundColor(color.RGBA{0xCC, 0xCC, 0xFF, 0xFF}),
 		).SetBackgroundColor(
 			color.RGBA{0x88, 0x88, 0x88, 0xFF},
 		).SetBorder(
