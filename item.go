@@ -116,7 +116,7 @@ func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) er
 	contentBox := paddingBox.shrink(c.Padding)
 
 	// 背景色
-	if c.BackgroundColor != nil && borderBox.w >= 0 && borderBox.h >= 0 {
+	if c.BackgroundColor != nil && borderBox.w > 0 && borderBox.h > 0 {
 		if err := setColor(pdf, c.BackgroundColor); err != nil {
 			return err
 		}
