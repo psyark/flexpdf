@@ -87,7 +87,7 @@ func TestText(t *testing.T) {
 	}
 
 	t.Log("write start")
-	if err := os.WriteFile("text.pdf", data, 0666); err != nil {
+	if err := os.WriteFile("testdata/out/text.pdf", data, 0666); err != nil {
 		t.Fatal(err)
 	}
 
@@ -102,7 +102,7 @@ func TestText(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		err := os.WriteFile(fmt.Sprintf("text_%02d.png", i), buf.Bytes(), 0666)
+		err := os.WriteFile(fmt.Sprintf("testdata/out/text_%02d.png", i), buf.Bytes(), 0666)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -164,7 +164,7 @@ func TestXxx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := os.WriteFile("out.pdf", data, 0666); err != nil {
+	if err := os.WriteFile("testdata/out/justifycontent.pdf", data, 0666); err != nil {
 		t.Fatal(err)
 	}
 }
