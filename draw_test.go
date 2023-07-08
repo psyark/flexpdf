@@ -4,10 +4,12 @@ package flexpdf
 // https://qiita.com/toshikitsubouchi/items/51c3268185cdc976a52f
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
+	"image"
 	"image/color"
-	"log"
+	"image/png"
 	"os"
 	"testing"
 
@@ -22,6 +24,23 @@ var (
 	//go:embed "testdata/fonts/ipaexm.ttf"
 	ipaexmBytes []byte
 )
+
+var mw *imagick.MagickWand
+
+func TestMain(m *testing.M) {
+	code := (func() int {
+		// 同じスコープで os.Exit すると 待機中のdefer が呼ばれないため
+		imagick.Initialize()
+		defer imagick.Terminate()
+
+		mw = imagick.NewMagickWand()
+		defer mw.Destroy()
+
+		return m.Run()
+	})()
+
+	os.Exit(code)
+}
 
 func TestText(t *testing.T) {
 	pdf := &gopdf.GoPdf{}
@@ -77,56 +96,52 @@ func TestText(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := hoge(data); err != nil {
+	images, err := getImages(data)
+	if err != nil {
 		t.Fatal(err)
+	}
+
+	for i, img := range images {
+		buf := bytes.NewBuffer(nil)
+		if err := png.Encode(buf, img); err != nil {
+			t.Fatal(err)
+		}
+
+		err := os.WriteFile(fmt.Sprintf("text_%02d.png", i), buf.Bytes(), 0666)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
-func hoge(pdfBytes []byte) error {
-	// ImageMagic を初期化する。
-	imagick.Initialize()
-	defer imagick.Terminate()
-
-	mw := imagick.NewMagickWand()
-	defer mw.Destroy()
-
-	// 解像度を設定する。
-	err := mw.SetResolution(150, 150)
-	if err != nil {
-		return errors.Wrap(err, "failed at SetResolution")
+func getImages(pdfBytes []byte) ([]image.Image, error) {
+	if err := mw.SetResolution(150, 150); err != nil {
+		return nil, errors.Wrap(err, "set resolution")
+	}
+	if err := mw.ReadImageBlob(pdfBytes); err != nil {
+		return nil, errors.Wrap(err, "read image")
+	}
+	if err := mw.SetImageFormat("png"); err != nil {
+		return nil, errors.Wrap(err, "set image format")
 	}
 
-	// 変換元のPDFを読み込む。
-	err = mw.ReadImageBlob(pdfBytes)
-	if err != nil {
-		return errors.Wrap(err, "failed at ReadImage")
-	}
+	images := []image.Image{}
 
-	// ページ数を取得する。
-	n := mw.GetNumberImages()
-	log.Println("number image: ", n)
-
-	// 出力フォーマットをPNGに設定する。
-	err = mw.SetImageFormat("png")
-	if err != nil {
-		return errors.Wrap(err, "failed at SetImageFormat")
-	}
-
-	// １ページずつ変換して出力する。
-	for i := 0; i < int(n); i++ {
-		// ページ番号を設定する。
+	for i := 0; i < int(mw.GetNumberImages()); i++ {
 		if !mw.SetIteratorIndex(i) {
 			break
 		}
 
-		// 画像を出力する。
-		err = mw.WriteImage(fmt.Sprintf("test_%02d.png", i))
+		imageBytes := mw.GetImageBlob()
+		img, err := png.Decode(bytes.NewReader(imageBytes))
 		if err != nil {
-			return errors.Wrap(err, "failed at WriteImage")
+			return nil, errors.Wrap(err, "png decode")
 		}
+
+		images = append(images, img)
 	}
 
-	return nil
+	return images, nil
 }
 
 func TestXxx(t *testing.T) {
