@@ -1,12 +1,19 @@
 package flexpdf
 
+// GoでPDFを画像に変換する
+// https://qiita.com/toshikitsubouchi/items/51c3268185cdc976a52f
+
 import (
 	_ "embed"
+	"fmt"
 	"image/color"
+	"log"
 	"os"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 var (
@@ -69,6 +76,57 @@ func TestText(t *testing.T) {
 	if err := os.WriteFile("text.pdf", data, 0666); err != nil {
 		t.Fatal(err)
 	}
+
+	if err := hoge(data); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func hoge(pdfBytes []byte) error {
+	// ImageMagic を初期化する。
+	imagick.Initialize()
+	defer imagick.Terminate()
+
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+
+	// 解像度を設定する。
+	err := mw.SetResolution(150, 150)
+	if err != nil {
+		return errors.Wrap(err, "failed at SetResolution")
+	}
+
+	// 変換元のPDFを読み込む。
+	err = mw.ReadImageBlob(pdfBytes)
+	if err != nil {
+		return errors.Wrap(err, "failed at ReadImage")
+	}
+
+	// ページ数を取得する。
+	n := mw.GetNumberImages()
+	log.Println("number image: ", n)
+
+	// 出力フォーマットをPNGに設定する。
+	err = mw.SetImageFormat("png")
+	if err != nil {
+		return errors.Wrap(err, "failed at SetImageFormat")
+	}
+
+	// １ページずつ変換して出力する。
+	for i := 0; i < int(n); i++ {
+		// ページ番号を設定する。
+		if !mw.SetIteratorIndex(i) {
+			break
+		}
+
+		// 画像を出力する。
+		err = mw.WriteImage(fmt.Sprintf("test_%02d.png", i))
+		if err != nil {
+			return errors.Wrap(err, "failed at WriteImage")
+		}
+	}
+
+	return nil
 }
 
 func TestXxx(t *testing.T) {
