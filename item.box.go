@@ -21,6 +21,13 @@ type Box struct {
 	Items          []FlexItem
 }
 
+func NewColumnBox(items ...FlexItem) *Box {
+	return NewBox(DirectionColumn, items...)
+}
+func NewRowBox(items ...FlexItem) *Box {
+	return NewBox(DirectionRow, items...)
+}
+
 func NewBox(dir Direction, items ...FlexItem) *Box {
 	b := &Box{
 		Direction:  dir,

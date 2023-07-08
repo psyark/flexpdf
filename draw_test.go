@@ -53,28 +53,23 @@ func TestText(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	root := NewBox(
-		DirectionColumn,
-		NewBox(
-			DirectionRow,
+	root := NewColumnBox(
+		NewRowBox(
 			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
 			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(5),
 			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
 			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetPadding(5),
 		).SetMargin(30),
-		NewBox(
-			DirectionRow,
+		NewRowBox(
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetAlign(TextAlignBegin),
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetAlign(TextAlignCenter),
 			NewText("ipaexg", 30, "Text").SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetAlign(TextAlignEnd),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
-		NewBox(
-			DirectionRow,
+		NewRowBox(
 			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
-		NewBox(
-			DirectionRow,
+		NewRowBox(
 			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
@@ -155,8 +150,7 @@ func TestXxx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	root := NewBox(
-		DirectionColumn,
+	root := NewColumnBox(
 		createJustifyContentExamples(DirectionColumn, DirectionRow),
 		createJustifyContentExamples(DirectionRow, DirectionColumn),
 	)
@@ -197,8 +191,7 @@ func createJustifyContentExamples(dir1, dir2 Direction) *Box {
 }
 
 func createJustifyContentExample(dir Direction, jc JustifyContent) *Box {
-	return NewBox(
-		DirectionColumn,
+	return NewColumnBox(
 		NewText("ipaexg", 14, string(jc)),
 		NewBox(
 			dir,
