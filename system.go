@@ -25,7 +25,9 @@ type FlexItem interface {
 	getFlexGrow() float64
 }
 
-func setColor(pdf *gopdf.GoPdf, col color.Color) error {
+func setColor(pdf *gopdf.GoPdf, col color.Color) (err error) {
+	defer wrap(&err, "setColor")
+
 	r, g, b, a := col.RGBA()
 	if a == 0xFFFF {
 		pdf.ClearTransparency()

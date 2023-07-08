@@ -28,7 +28,9 @@ func UniformedBorder(col color.Color, style BorderStyle, width float64) Border {
 	}
 }
 
-func (b *Border) draw(pdf *gopdf.GoPdf, r rect) error {
+func (b *Border) draw(pdf *gopdf.GoPdf, r rect) (err error) {
+	defer wrap(&err, "border.draw")
+
 	r.x += b.Width.Left / 2
 	r.y += b.Width.Top / 2
 	r.w -= (b.Width.Left + b.Width.Right) / 2
