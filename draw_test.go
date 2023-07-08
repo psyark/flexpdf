@@ -25,7 +25,7 @@ var (
 	ipaexmBytes []byte
 )
 
-var mw *imagick.MagickWand
+// var mw *imagick.MagickWand
 
 func TestMain(m *testing.M) {
 	code := (func() int {
@@ -33,27 +33,51 @@ func TestMain(m *testing.M) {
 		imagick.Initialize()
 		defer imagick.Terminate()
 
-		mw = imagick.NewMagickWand()
-		defer mw.Destroy()
-
 		return m.Run()
 	})()
 
 	os.Exit(code)
 }
 
-func TestText(t *testing.T) {
-	pdf := &gopdf.GoPdf{}
-	pdf.Start(gopdf.Config{})
+func TestDraw(t *testing.T) {
+	for name, box := range cases {
+		name, box := name, box
+		t.Run(name, func(t *testing.T) {
+			pdf := &gopdf.GoPdf{}
+			pdf.Start(gopdf.Config{})
 
-	if err := pdf.AddTTFFontData("ipaexg", ipaexgBytes); err != nil {
-		t.Fatal(err)
-	}
-	if err := pdf.AddTTFFontData("", ipaexgBytes); err != nil {
-		t.Fatal(err)
-	}
+			if err := pdf.AddTTFFontData("ipaexg", ipaexgBytes); err != nil {
+				t.Fatal(err)
+			}
+			if err := pdf.AddTTFFontData("ipaexm", ipaexmBytes); err != nil {
+				t.Fatal(err)
+			}
+			if err := pdf.AddTTFFontData("", ipaexgBytes); err != nil {
+				t.Fatal(err)
+			}
 
-	root := NewColumnBox(
+			if err := Draw(pdf, box, gopdf.PageSizeA4); err != nil {
+				t.Fatal(err)
+			}
+
+			data, err := pdf.GetBytesPdfReturnErr()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := os.WriteFile(fmt.Sprintf("testdata/out/%s.pdf", name), data, 0666); err != nil {
+				t.Fatal(err)
+			}
+
+			if err := compareImage(data, fmt.Sprintf("testdata/out/%s.png", name)); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+var cases = map[string]*Box{
+	"text": NewColumnBox(
 		NewRowBox(
 			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
 			NewText("ipaexg", 30, "Text").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(5),
@@ -73,43 +97,45 @@ func TestText(t *testing.T) {
 			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 			NewText("ipaexg", 30, "あいうえおかきくけこさしすせそたちつてと").SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
-	).SetPadding(50)
+	).SetPadding(50),
 
-	t.Log("draw start")
-	if err := Draw(pdf, root, gopdf.PageSizeA4); err != nil {
-		t.Fatal(err)
-	}
+	"justifycontent": NewColumnBox(
+		createJustifyContentExamples(DirectionColumn, DirectionRow),
+		createJustifyContentExamples(DirectionRow, DirectionColumn),
+	),
+}
 
-	t.Log("draw end")
-	data, err := pdf.GetBytesPdfReturnErr()
+func compareImage(pdfBytes []byte, fileName string) error {
+	images, err := getImages(pdfBytes)
 	if err != nil {
-		t.Fatal(err)
+		return err
 	}
 
-	t.Log("write start")
-	if err := os.WriteFile("testdata/out/text.pdf", data, 0666); err != nil {
-		t.Fatal(err)
+	if len(images) != 1 {
+		return fmt.Errorf("len(images) = %d", len(images))
 	}
 
-	images, err := getImages(data)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for i, img := range images {
+	for _, img := range images {
 		buf := bytes.NewBuffer(nil)
 		if err := png.Encode(buf, img); err != nil {
-			t.Fatal(err)
+			return err
 		}
 
-		err := os.WriteFile(fmt.Sprintf("testdata/out/text_%02d.png", i), buf.Bytes(), 0666)
+		// TODO 比較
+
+		err := os.WriteFile(fileName, buf.Bytes(), 0666)
 		if err != nil {
-			t.Fatal(err)
+			return err
 		}
 	}
+
+	return nil
 }
 
 func getImages(pdfBytes []byte) ([]image.Image, error) {
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+
 	if err := mw.SetResolution(150, 150); err != nil {
 		return nil, errors.Wrap(err, "set resolution")
 	}
@@ -137,36 +163,6 @@ func getImages(pdfBytes []byte) ([]image.Image, error) {
 	}
 
 	return images, nil
-}
-
-func TestXxx(t *testing.T) {
-	pdf := &gopdf.GoPdf{}
-	pdf.Start(gopdf.Config{})
-
-	if err := pdf.AddTTFFontData("ipaexg", ipaexgBytes); err != nil {
-		t.Fatal(err)
-	}
-	if err := pdf.AddTTFFontData("ipaexm", ipaexmBytes); err != nil {
-		t.Fatal(err)
-	}
-
-	root := NewColumnBox(
-		createJustifyContentExamples(DirectionColumn, DirectionRow),
-		createJustifyContentExamples(DirectionRow, DirectionColumn),
-	)
-
-	if err := Draw(pdf, root, gopdf.PageSizeA4); err != nil {
-		t.Fatal(err)
-	}
-
-	data, err := pdf.GetBytesPdfReturnErr()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err := os.WriteFile("testdata/out/justifycontent.pdf", data, 0666); err != nil {
-		t.Fatal(err)
-	}
 }
 
 func createJustifyContentExamples(dir1, dir2 Direction) *Box {

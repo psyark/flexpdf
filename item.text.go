@@ -2,8 +2,6 @@ package flexpdf
 
 import (
 	"image/color"
-	"log"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
@@ -51,7 +49,7 @@ func NewText(family string, size float64, text string) *Text {
 }
 
 func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
-	log.Printf("%sText.draw(r=%v, t=%q)\n", strings.Repeat("  ", depth), r, t.Text)
+	// log.Printf("%sText.draw(r=%v, t=%q)\n", strings.Repeat("  ", depth), r, t.Text)
 
 	if err := pdf.SetFont(t.FontFamily, "", t.FontSize); err != nil {
 		return errors.Wrap(err, "setFont")

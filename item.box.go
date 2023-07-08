@@ -1,9 +1,7 @@
 package flexpdf
 
 import (
-	"log"
 	"math"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/signintech/gopdf"
@@ -46,7 +44,7 @@ func (b *Box) SetAlignItems(aa AlignItems) *Box {
 	return b
 }
 func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
-	log.Printf("%sBox.draw(r=%v, d=%v jc=%v ai=%v)\n", strings.Repeat("  ", depth), r, b.Direction, b.JustifyContent, b.AlignItems)
+	// log.Printf("%sBox.draw(r=%v, d=%v jc=%v ai=%v)\n", strings.Repeat("  ", depth), r, b.Direction, b.JustifyContent, b.AlignItems)
 
 	mainAxis := b.Direction.mainAxis()
 	counterAxis := !mainAxis
@@ -86,7 +84,7 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) error {
 			spacing = mainAxisRemains - growing
 		}
 
-		log.Println(mainAxisRemains, growTotal, growing, spacing)
+		// log.Println(mainAxisRemains, growTotal, growing, spacing)
 
 		// 2パス目は幅を制限したときのサイズ
 		for i, item := range b.Items {
