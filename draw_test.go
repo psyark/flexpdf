@@ -11,6 +11,7 @@ import (
 	"image/color"
 	"image/png"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -25,7 +26,7 @@ var (
 	ipaexmBytes []byte
 )
 
-// var mw *imagick.MagickWand
+var errUnmatch = errors.New("unmatch")
 
 func TestMain(m *testing.M) {
 	code := (func() int {
@@ -115,21 +116,60 @@ func compareImage(pdfBytes []byte, fileName string) error {
 		return fmt.Errorf("len(images) = %d", len(images))
 	}
 
-	for _, img := range images {
+	imgGot := images[0]
+	var bytesGot []byte
+
+	{
 		buf := bytes.NewBuffer(nil)
-		if err := png.Encode(buf, img); err != nil {
+		if err := png.Encode(buf, imgGot); err != nil {
 			return err
 		}
+		bytesGot = buf.Bytes()
+	}
 
-		// TODO 比較
+	bytesWant, err := os.ReadFile(fileName)
+	if err == os.ErrNotExist {
+		// 存在しない場合は保存する。比較はしない
+		return os.WriteFile(fileName, bytesGot, 0666)
+	}
 
-		err := os.WriteFile(fileName, buf.Bytes(), 0666)
+	diffFileName := strings.TrimSuffix(fileName, ".png") + "_diff.png"
+	gotFileName := strings.TrimSuffix(fileName, ".png") + "_got.png"
+	if bytes.Equal(bytesGot, bytesWant) {
+		_ = os.Remove(diffFileName)
+		_ = os.Remove(gotFileName)
+		return nil
+	} else {
+		imgWant, err := png.Decode(bytes.NewReader(bytesWant))
 		if err != nil {
 			return err
 		}
-	}
 
-	return nil
+		imgDiff := image.NewGray(imgWant.Bounds().Union(imgGot.Bounds()))
+		for y := imgDiff.Rect.Min.Y; y < imgDiff.Rect.Max.Y; y++ {
+			for x := imgDiff.Rect.Min.X; x < imgDiff.Rect.Max.X; x++ {
+				if imgWant.At(x, y) == imgGot.At(x, y) {
+					imgDiff.Set(x, y, color.White)
+				} else {
+					imgDiff.Set(x, y, color.Black)
+				}
+			}
+		}
+
+		buf := bytes.NewBuffer(nil)
+		if err := png.Encode(buf, imgDiff); err != nil {
+			return err
+		}
+
+		if err := os.WriteFile(diffFileName, buf.Bytes(), 0666); err != nil {
+			return err
+		}
+		if err := os.WriteFile(gotFileName, bytesGot, 0666); err != nil {
+			return err
+		}
+
+		return errors.Wrap(errUnmatch, fileName)
+	}
 }
 
 func getImages(pdfBytes []byte) ([]image.Image, error) {
