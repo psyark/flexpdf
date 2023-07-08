@@ -86,7 +86,7 @@ var cases = map[string]*Box{
 			NewText(NewRun("color").SetFontSize(30).SetColor(color.RGBA{R: 0xFF, A: 0xFF})),
 			NewText(NewRun("family").SetFontSize(30).SetFontFamily("ipaexm")),
 		),
-		// many run for 1 text
+		// multiple runs for 1 text
 		NewRowBox(
 			NewText(
 				NewRun("normal").SetFontSize(30),
@@ -95,6 +95,13 @@ var cases = map[string]*Box{
 				NewRun("family").SetFontSize(30).SetFontFamily("ipaexm"),
 			),
 		),
+		// text with break
+		NewRowBox(
+			NewText(NewRun("This text contains newline\nhere.").SetFontSize(30)),
+		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+		NewRowBox(
+			NewText(NewRun("This text contains newline\nhere.").SetFontSize(50)),
+		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		NewRowBox(
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(5),

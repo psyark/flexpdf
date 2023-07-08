@@ -2,6 +2,8 @@ package flexpdf
 
 import (
 	"image/color"
+	"math"
+	"strings"
 
 	"github.com/signintech/gopdf"
 )
@@ -19,15 +21,15 @@ const (
 type Text struct {
 	flexItemCommon[*Text]
 
-	LineHeight float64
-	Align      TextAlign
-	Runs       []*TextRun
+	Align TextAlign
+	Runs  []*TextRun
 }
 
 type TextRun struct {
 	Color      color.Color
 	FontSize   float64
 	FontFamily string
+	LineHeight float64
 	Text       string
 }
 
@@ -36,6 +38,7 @@ func NewRun(text string) *TextRun {
 		Color:      color.Black,
 		FontSize:   10,
 		FontFamily: "",
+		LineHeight: 1,
 		Text:       text,
 	}
 }
@@ -51,17 +54,64 @@ func (r *TextRun) SetFontFamily(f string) *TextRun {
 	r.FontFamily = f
 	return r
 }
+func (r *TextRun) SetLineHeight(lineHeight float64) *TextRun {
+	r.LineHeight = lineHeight
+	return r
+}
 func (r *TextRun) SetText(t string) *TextRun {
 	r.Text = t
 	return r
 }
 
+// splitToNBR は改行コードのみを考慮して noBrRunのリストに分割します
+func (r *TextRun) splitWithNewline() []noBrRun {
+	nbrs := []noBrRun{}
+	nbr := noBrRun{*r}
+	for _, text := range strings.Split(r.Text, "\n") {
+		nbr.Text = text
+		nbrs = append(nbrs, nbr)
+	}
+	return nbrs
+}
+
+// 改行を含まない TextRun
+type noBrRun struct {
+	TextRun
+}
+
+func (r *noBrRun) size(pdf *gopdf.GoPdf) (size, error) {
+	if err := pdf.SetFont(r.FontFamily, "", r.FontSize); err != nil {
+		return size{}, err
+	}
+	w, err := pdf.MeasureTextWidth(r.Text)
+	if err != nil {
+		return size{}, err
+	}
+	return size{w: w, h: r.FontSize * r.LineHeight}, nil
+}
+func (r *noBrRun) draw(pdf *gopdf.GoPdf) error {
+	if err := pdf.SetFont(r.FontFamily, "", r.FontSize); err != nil {
+		return err
+	}
+	if err := setColor(pdf, r.Color); err != nil {
+		return err
+	}
+
+	s, err := r.size(pdf)
+	if err != nil {
+		return err
+	}
+
+	return pdf.Cell(&gopdf.Rect{W: s.w, H: s.h}, r.Text)
+}
+
+type textLine struct {
+	size size
+	nbrs []noBrRun
+}
+
 func (t *Text) AddRun(run *TextRun) *Text {
 	t.Runs = append(t.Runs, run)
-	return t
-}
-func (t *Text) SetLineHeight(lineHeight float64) *Text {
-	t.LineHeight = lineHeight
 	return t
 }
 func (t *Text) SetAlign(align TextAlign) *Text {
@@ -71,8 +121,7 @@ func (t *Text) SetAlign(align TextAlign) *Text {
 
 func NewText(runs ...*TextRun) *Text {
 	t := &Text{
-		LineHeight: 1,
-		Runs:       runs,
+		Runs: runs,
 	}
 	t.flexItemCommon.init(t)
 	return t
@@ -81,90 +130,84 @@ func NewText(runs ...*TextRun) *Text {
 func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect, depth int) (err error) {
 	defer wrap(&err, "text.drawContent")
 
-	for _, run := range t.Runs {
-		if err := pdf.SetFont(run.FontFamily, "", run.FontSize); err != nil {
-			return err
-		}
+	lines, err := t.splitLines(pdf, r.w)
+	if err != nil {
+		return err
+	}
 
-		{
-			c := run.Color
-			if c == nil {
-				c = color.Black
-			}
-			if err := setColor(pdf, c); err != nil {
+	pdf.SetXY(r.x, r.y)
+	for _, line := range lines {
+		pdf.SetX(r.x) // TODO align
+		for _, nbr := range line.nbrs {
+			if err := nbr.draw(pdf); err != nil {
 				return err
 			}
 		}
-
-		pdf.SetXY(r.x, r.y)
-		// TODO 幅が小さすぎる場合に無限ループになるのを抑制
-		if r.w < 20 {
-			return nil
-		}
-
-		lines, err := pdf.SplitText(run.Text, r.w)
-		if err != nil {
-			return err
-		}
-
-		for _, line := range lines {
-			opt := gopdf.CellOption{}
-			switch t.Align {
-			case TextAlignBegin:
-				opt.Align = gopdf.Left
-			case TextAlignCenter:
-				opt.Align = gopdf.Center
-			case TextAlignEnd:
-				opt.Align = gopdf.Right
-			}
-
-			if err := pdf.MultiCellWithOption(&gopdf.Rect{W: r.w, H: r.h}, line, opt); err != nil {
-				return err
-			}
-			pdf.Br((t.LineHeight - 1) * run.FontSize)
-			pdf.SetX(r.x)
-		}
+		pdf.Br(line.size.h)
 	}
 
 	return nil
 }
 
-func (t *Text) getContentSize(pdf *gopdf.GoPdf, width float64) (s size, err error) {
+func (t *Text) getContentSize(pdf *gopdf.GoPdf, widthLimit float64) (s size, err error) {
 	defer wrap(&err, "text.getContentSize")
 
-	run := t.Runs[0]
-
-	if err := pdf.SetFont(run.FontFamily, "", run.FontSize); err != nil {
+	lines, err := t.splitLines(pdf, widthLimit)
+	if err != nil {
 		return size{}, err
 	}
 
-	if width < 0 { // 負の場合、幅が制限されないときのサイズを調べる
-		width = 10000000
-	}
-
-	lines := []string{}
-
-	if run.Text != "" {
-		if lines_, err := pdf.SplitText(run.Text, width); err != nil {
-			return size{}, err
-		} else {
-			lines = lines_
-		}
-	}
-
-	cs := size{
-		h: run.FontSize * (float64(len(lines)) + (t.LineHeight-1)*float64(len(lines)-1)),
-	}
-
 	for _, line := range lines {
-		w, err := pdf.MeasureTextWidth(line)
-		if err != nil {
-			return size{}, err
-		}
-		if cs.w < w {
-			cs.w = w
-		}
+		s.w = math.Max(s.w, line.size.w)
+		s.h += line.size.h
+	}
+	return s, nil
+}
+
+// splitLinesは Runs を行ごとに区切り、 [][]TextRunを返します。
+// 返されるスライスは行を表しており、その要素は行に含まれるRunです。
+// 下記のルールが考慮されます
+// [ ] Textの幅
+// [v] Runに含まれる改行コード
+// [ ] 禁則処理
+// [ ]  - 連続する欧文文字と空白
+// [ ]  - 句読点や約物
+func (t *Text) splitLines(pdf *gopdf.GoPdf, widthLimit float64) ([]textLine, error) {
+	if false {
+		pdf.SplitText("", 10)
 	}
 
-	return cs, nil
+	lines := []textLine{}
+	for _, r := range t.Runs {
+		for i, nbr := range r.splitWithNewline() {
+			if len(lines) == 0 || i != 0 {
+				lines = append(lines, textLine{})
+			}
+
+			s, err := nbr.size(pdf)
+			if err != nil {
+				return nil, err
+			}
+
+			line := &lines[len(lines)-1]
+			line.nbrs = append(line.nbrs, nbr)
+			line.size.w += s.w
+			line.size.h = math.Max(line.size.h, s.h)
+		}
+
+		// s, err := nbr.size(pdf)
+		// if err != nil {
+		// 	return nil, err
+		// }
+
+		// nbr.split(widthLimit - line.width)
+
+		// if line.width+s.w > widthLimit {
+		// 	panic("TODO")
+		// }
+
+		// line.width += s.w
+	}
+
+	return lines, nil
 }
