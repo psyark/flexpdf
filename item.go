@@ -139,6 +139,8 @@ func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf, width float64) (s
 		return size{}, err
 	}
 
+	// TODO もしWidthが指定されてるなら、そこからMargin, Border, Paddingを引いてから
+	// getContentSizeにwidthを渡す
 	if c.Width >= 0 {
 		ps.w = c.Width
 	}

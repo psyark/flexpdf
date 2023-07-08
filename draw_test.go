@@ -103,6 +103,12 @@ var cases = map[string]*Box{
 			NewText(NewRun("This text contains newline\nhere.").SetFontSize(50)),
 		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		NewRowBox(
+			NewText(NewRun("This text contains newline\nhere.").SetFontSize(30)),
+		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetSize(200, 120),
+		NewRowBox(
+			NewText(NewRun("This text contains newline\nhere.").SetFontSize(50)),
+		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetSize(200, 120),
+		NewRowBox(
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(5),
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
@@ -121,7 +127,7 @@ var cases = map[string]*Box{
 			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
-	).SetPadding(50),
+	).SetPadding(50).SetAlignItems(AlignItemsFlexStart),
 
 	"justifycontent": NewColumnBox(
 		createJustifyContentExamples(DirectionColumn, DirectionRow),

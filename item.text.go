@@ -2,6 +2,7 @@ package flexpdf
 
 import (
 	"image/color"
+	"log"
 	"math"
 	"strings"
 
@@ -88,6 +89,54 @@ func (r *noBrRun) size(pdf *gopdf.GoPdf) (size, error) {
 		return size{}, err
 	}
 	return size{w: w, h: r.FontSize * r.LineHeight}, nil
+}
+func (r *noBrRun) splitWithWidth(pdf *gopdf.GoPdf, widthLimit float64) (*noBrRun, *noBrRun, error) {
+	if widthLimit < 0 {
+		return r, nil, nil
+	}
+
+	if err := pdf.SetFont(r.FontFamily, "", r.FontSize); err != nil {
+		return nil, nil, err
+	}
+
+	runes := []rune(r.Text)
+	index, err := r.getSplitIndex(pdf, runes, 0, len(runes), widthLimit)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	log.Println("🍣", index, index == len(runes), widthLimit, r.Text)
+	if index == len(runes) {
+		return r, nil, nil
+	} else {
+		nbr1 := noBrRun{TextRun: r.TextRun}
+		nbr1.Text = string(runes[:index])
+		nbr2 := noBrRun{TextRun: r.TextRun}
+		nbr2.Text = string(runes[index:])
+		return &nbr1, &nbr2, nil
+	}
+}
+
+func (r *noBrRun) getSplitIndex(pdf *gopdf.GoPdf, runes []rune, start, end int, widthLimit float64) (int, error) {
+	if start == end {
+		return start, nil
+	}
+	if start+1 == end {
+		return start + 1, nil
+	}
+
+	mid := int(start+end) / 2
+	w, err := pdf.MeasureTextWidth(string(runes[:mid]))
+	if err != nil {
+		return -1, err
+	}
+
+	// log.Println("🍣🍣", start, end, w, widthLimit)
+	if w > widthLimit {
+		return r.getSplitIndex(pdf, runes, start, mid, widthLimit)
+	} else {
+		return r.getSplitIndex(pdf, runes, mid, end, widthLimit)
+	}
 }
 func (r *noBrRun) draw(pdf *gopdf.GoPdf) error {
 	if err := pdf.SetFont(r.FontFamily, "", r.FontSize); err != nil {
@@ -184,29 +233,35 @@ func (t *Text) splitLines(pdf *gopdf.GoPdf, widthLimit float64) ([]textLine, err
 				lines = append(lines, textLine{})
 			}
 
-			s, err := nbr.size(pdf)
-			if err != nil {
-				return nil, err
+			for {
+				line := &lines[len(lines)-1]
+
+				nbr1, nbr2, err := nbr.splitWithWidth(pdf, widthLimit-line.size.w)
+				if err != nil {
+					return nil, err
+				}
+
+				if nbr2 != nil {
+					log.Println(nbr1.Text, nbr2.Text)
+				}
+
+				s, err := nbr1.size(pdf)
+				if err != nil {
+					return nil, err
+				}
+
+				line.nbrs = append(line.nbrs, *nbr1)
+				line.size.w += s.w
+				line.size.h = math.Max(line.size.h, s.h)
+
+				if nbr2 != nil {
+					lines = append(lines, textLine{})
+					nbr = *nbr2
+				} else {
+					break
+				}
 			}
-
-			line := &lines[len(lines)-1]
-			line.nbrs = append(line.nbrs, nbr)
-			line.size.w += s.w
-			line.size.h = math.Max(line.size.h, s.h)
 		}
-
-		// s, err := nbr.size(pdf)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// nbr.split(widthLimit - line.width)
-
-		// if line.width+s.w > widthLimit {
-		// 	panic("TODO")
-		// }
-
-		// line.width += s.w
 	}
 
 	return lines, nil
