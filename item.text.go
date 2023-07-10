@@ -105,7 +105,7 @@ func (r *noBrRun) splitWithWidth(pdf *gopdf.GoPdf, widthLimit float64) (*noBrRun
 		return nil, nil, err
 	}
 
-	log.Println("🍣", index, index == len(runes), widthLimit, r.Text)
+	log.Printf("🍣 only=%v, idx=%v, wl=%v, t=%q\n", index == len(runes), index, widthLimit, r.Text)
 	if index == len(runes) {
 		return r, nil, nil
 	} else {
@@ -198,10 +198,10 @@ func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect, depth int) (err error) {
 	return nil
 }
 
-func (t *Text) getContentSize(pdf *gopdf.GoPdf, widthLimit float64) (s size, err error) {
+func (t *Text) getContentSize(pdf *gopdf.GoPdf, maxWidth float64) (s size, err error) {
 	defer wrap(&err, "text.getContentSize")
 
-	lines, err := t.splitLines(pdf, widthLimit)
+	lines, err := t.splitLines(pdf, maxWidth)
 	if err != nil {
 		return size{}, err
 	}

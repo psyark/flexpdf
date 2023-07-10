@@ -2,6 +2,7 @@ package flexpdf
 
 import (
 	"image/color"
+	"math"
 
 	"github.com/signintech/gopdf"
 )
@@ -133,8 +134,8 @@ func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) (e
 	}
 	return nil
 }
-func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf, width float64) (size, error) {
-	ps, err := c.self.getContentSize(pdf, width)
+func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf, maxWidth float64) (size, error) {
+	ps, err := c.self.getContentSize(pdf, math.Min(maxWidth, c.Width-c.Margin.w()-c.Padding.w()-c.Border.Width.w()))
 	if err != nil {
 		return size{}, err
 	}
