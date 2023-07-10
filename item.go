@@ -7,9 +7,10 @@ import (
 	"github.com/signintech/gopdf"
 )
 
+// TODO 良い名前
 type flexItemExtender interface {
 	FlexItem
-	drawContent(*gopdf.GoPdf, rect, int) error
+	drawContent(*gopdf.GoPdf, rect) error
 	getContentSize(pdf *gopdf.GoPdf, width float64) (size, error)
 }
 
@@ -110,7 +111,7 @@ func (c *flexItemCommon[T]) SetPadding(values ...float64) T {
 	return c.self
 }
 
-func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) (err error) {
+func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect) (err error) {
 	defer wrap(&err, "common.draw")
 
 	borderBox := marginBox.shrink(c.Margin)
@@ -126,7 +127,7 @@ func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect, depth int) (e
 			return err
 		}
 	}
-	if err := c.self.drawContent(pdf, contentBox, depth); err != nil {
+	if err := c.self.drawContent(pdf, contentBox); err != nil {
 		return err
 	}
 	if err := c.Border.draw(pdf, borderBox); err != nil {

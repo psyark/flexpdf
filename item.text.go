@@ -174,7 +174,7 @@ func NewText(runs ...*TextRun) *Text {
 	return t
 }
 
-func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect, depth int) (err error) {
+func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 	defer wrap(&err, "text.drawContent")
 
 	lines, err := t.splitLines(pdf, r.w)

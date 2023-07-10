@@ -42,10 +42,8 @@ func (b *Box) SetAlignItems(aa AlignItems) *Box {
 	b.AlignItems = aa
 	return b
 }
-func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) (err error) {
+func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 	defer wrap(&err, "box.drawContent")
-
-	// log.Printf("%sBox.draw(r=%v, d=%v jc=%v ai=%v)\n", strings.Repeat("  ", depth), r, b.Direction, b.JustifyContent, b.AlignItems)
 
 	mainAxis := b.Direction.mainAxis()
 	counterAxis := !mainAxis
@@ -138,7 +136,7 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect, depth int) (err error) {
 		}
 
 		// 描画
-		if err := item.draw(pdf, itemRect, depth+1); err != nil {
+		if err := item.draw(pdf, itemRect); err != nil {
 			return err
 		}
 
