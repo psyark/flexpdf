@@ -40,6 +40,13 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
+const (
+	text = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`
+)
+
 func TestDraw(t *testing.T) {
 	for name, box := range cases {
 		name, box := name, box
@@ -98,24 +105,24 @@ var cases = map[string]*Box{
 		// text with break
 		// サイズ未指定
 		NewRowBox(
-			NewText(NewRun("This text contains newline\nhere.").SetFontSize(14)),
+			NewText(NewRun(text).SetFontSize(14)),
 		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		NewRowBox(
-			NewText(NewRun("This text contains newline\nhere.").SetFontSize(24)),
+			NewText(NewRun(text).SetFontSize(24)),
 		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		// 親がサイズ指定
 		NewRowBox(
-			NewText(NewRun("This text contains newline\nhere.").SetFontSize(14)),
+			NewText(NewRun(text).SetFontSize(14)),
 		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
 		NewRowBox(
-			NewText(NewRun("This text contains newline\nhere.").SetFontSize(24)),
+			NewText(NewRun(text).SetFontSize(24)),
 		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
 		// 自身がサイズ指定
 		NewRowBox(
-			NewText(NewRun("This text contains newline\nhere.").SetFontSize(14)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
+			NewText(NewRun(text).SetFontSize(14)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
 		),
 		NewRowBox(
-			NewText(NewRun("This text contains newline\nhere.").SetFontSize(24)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
+			NewText(NewRun(text).SetFontSize(24)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
 		),
 		NewRowBox(
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),

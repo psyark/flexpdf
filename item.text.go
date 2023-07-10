@@ -2,7 +2,6 @@ package flexpdf
 
 import (
 	"image/color"
-	"log"
 	"math"
 	"strings"
 
@@ -105,7 +104,6 @@ func (r *noBrRun) splitWithWidth(pdf *gopdf.GoPdf, widthLimit float64) (*noBrRun
 		return nil, nil, err
 	}
 
-	log.Printf("🍣 only=%v, idx=%v, wl=%v, t=%q\n", index == len(runes), index, widthLimit, r.Text)
 	if index == len(runes) {
 		return r, nil, nil
 	} else {
@@ -117,6 +115,7 @@ func (r *noBrRun) splitWithWidth(pdf *gopdf.GoPdf, widthLimit float64) (*noBrRun
 	}
 }
 
+// TODO 2分探索しないで線形探索する？
 func (r *noBrRun) getSplitIndex(pdf *gopdf.GoPdf, runes []rune, start, end int, widthLimit float64) (int, error) {
 	if start == end {
 		return start, nil
@@ -131,7 +130,6 @@ func (r *noBrRun) getSplitIndex(pdf *gopdf.GoPdf, runes []rune, start, end int, 
 		return -1, err
 	}
 
-	// log.Println("🍣🍣", start, end, w, widthLimit)
 	if w > widthLimit {
 		return r.getSplitIndex(pdf, runes, start, mid, widthLimit)
 	} else {
@@ -239,10 +237,6 @@ func (t *Text) splitLines(pdf *gopdf.GoPdf, widthLimit float64) ([]textLine, err
 				nbr1, nbr2, err := nbr.splitWithWidth(pdf, widthLimit-line.size.w)
 				if err != nil {
 					return nil, err
-				}
-
-				if nbr2 != nil {
-					log.Println(nbr1.Text, nbr2.Text)
 				}
 
 				s, err := nbr1.size(pdf)
