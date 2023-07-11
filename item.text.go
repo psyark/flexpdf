@@ -2,7 +2,6 @@ package flexpdf
 
 import (
 	"image/color"
-	"log"
 	"math"
 	"strings"
 
@@ -190,10 +189,6 @@ func (t *Text) getContentSize(pdf *gopdf.GoPdf, contentBoxMax size) (s size, err
 	for _, line := range lines {
 		s.w = math.Max(s.w, line.size.w)
 		s.h += line.size.h
-	}
-
-	if strings.HasPrefix(t.Runs[0].Text, "Lorem ipsum") {
-		log.Println(s, contentBoxMax.w)
 	}
 
 	return s, nil

@@ -1,7 +1,6 @@
 package flexpdf
 
 import (
-	"log"
 	"math"
 
 	"github.com/signintech/gopdf"
@@ -64,9 +63,6 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 			if err != nil {
 				return err
 			}
-			if ps.h > 600 {
-				log.Print("🍈", ps)
-			}
 			growTotal += item.getFlexGrow()
 			prefSizes[i] = ps
 			mainAxisRemains -= ps.get(mainAxis)
@@ -96,16 +92,20 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 				})
 			}
 
-			if mainAxis == horizontal { // TODO これ要る？
-				ps_, err := item.getPreferredSize(pdf, ps) // グロー・シュリンクしたサイズ
-				if err != nil {
-					return err
+			ps_, err := item.getPreferredSize(pdf, ps) // グロー・シュリンクしたサイズ
+			if err != nil {
+				return err
+			}
+			{
+				// TODO ここの仕様を明確にする
+				// なぜmainAxisで分岐している？
+				// なぜMaxしている？
+				// グローの再計算は不要？
+				if mainAxis == horizontal {
+					ps.w = math.Max(ps.w, ps_.w)
+				} else {
+					ps.h = math.Max(ps.h, ps_.h)
 				}
-				if ps_.h > 600 {
-					log.Println("🍈", ps_)
-				}
-				// TODO 幅も更新？
-				ps.h = ps_.h // 高さだけ更新
 			}
 
 			prefSizes[i] = ps
@@ -130,10 +130,6 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 
 	for i, item := range b.Items {
 		ps := prefSizes[i]
-		if ps.h > 600 {
-			log.Println("🍈🍈", ps)
-		}
-
 		itemRect.w = ps.w
 		itemRect.h = ps.h
 
@@ -166,7 +162,6 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 	return nil
 }
 func (b *Box) getContentSize(pdf *gopdf.GoPdf, contentBoxMax size) (size, error) {
-	log.Println(contentBoxMax)
 
 	cs := size{}
 	for _, item := range b.Items {
@@ -183,5 +178,6 @@ func (b *Box) getContentSize(pdf *gopdf.GoPdf, contentBoxMax size) (size, error)
 			return math.Max(ov, ips.get(counterAxis))
 		})
 	}
+
 	return cs, nil
 }

@@ -84,6 +84,13 @@ func TestDraw(t *testing.T) {
 	}
 }
 
+var (
+	colorL = color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}
+	colorR = color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}
+	colorG = color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}
+	colorB = color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}
+)
+
 var cases = map[string]*Box{
 	"text": NewColumnBox(
 		// 1 run for 1 text
@@ -116,23 +123,23 @@ var cases = map[string]*Box{
 			NewText(NewRun(text).SetFontSize(14)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
 		).SetMargin(0, 0, 0, 80),
 		NewRowBox(
-			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
-			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(5),
-			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
-			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetPadding(5),
+			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(colorL),
+			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(colorR).SetMargin(5),
+			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(colorG).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 5)),
+			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(colorB).SetPadding(5),
 		).SetMargin(30),
 		NewRowBox(
-			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
-			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetAlign(TextAlignBegin),
-			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xFF, B: 0xCC, A: 0xFF}).SetAlign(TextAlignCenter),
-			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xFF, A: 0xFF}).SetAlign(TextAlignEnd),
+			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(colorL),
+			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(colorR).SetAlign(TextAlignBegin),
+			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(colorG).SetAlign(TextAlignCenter),
+			NewText(NewRun("Text").SetFontSize(30)).SetFlexGrow(1).SetBackgroundColor(colorB).SetAlign(TextAlignEnd),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 		NewRowBox(
-			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(colorR).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 		NewRowBox(
-			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
-			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(colorR).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+			NewText(NewRun("あいうえおかきくけこさしすせそたちつてと").SetFontSize(30)).SetBackgroundColor(colorR).SetMargin(10).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		).SetMargin(30).SetBorder(UniformedBorder(color.Black, BorderStyleDashed, 1)),
 	).SetPadding(50).SetAlignItems(AlignItemsFlexStart),
 
