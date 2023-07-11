@@ -100,43 +100,25 @@ func (r *noBrRun) splitWithWidth(pdf *gopdf.GoPdf, widthLimit float64) (*noBrRun
 	}
 
 	runes := []rune(r.Text)
-	index, err := r.getSplitIndex(pdf, runes, 0, len(runes), widthLimit)
-	if err != nil {
-		return nil, nil, err
+	for i := 1; i <= len(runes); i++ {
+		w, err := pdf.MeasureTextWidth(string(runes[:i]))
+		if err != nil {
+			return nil, nil, err
+		}
+		if w > widthLimit {
+			if i > 1 {
+				i--
+			}
+			nbr1 := noBrRun{TextRun: r.TextRun}
+			nbr1.Text = string(runes[:i])
+			nbr2 := noBrRun{TextRun: r.TextRun}
+			nbr2.Text = string(runes[i:])
+			return &nbr1, &nbr2, nil
+		}
 	}
-
-	if index == len(runes) {
-		return r, nil, nil
-	} else {
-		nbr1 := noBrRun{TextRun: r.TextRun}
-		nbr1.Text = string(runes[:index])
-		nbr2 := noBrRun{TextRun: r.TextRun}
-		nbr2.Text = string(runes[index:])
-		return &nbr1, &nbr2, nil
-	}
+	return r, nil, nil
 }
 
-// TODO 2分探索しないで線形探索する？
-func (r *noBrRun) getSplitIndex(pdf *gopdf.GoPdf, runes []rune, start, end int, widthLimit float64) (int, error) {
-	if start == end {
-		return start, nil
-	}
-	if start+1 == end {
-		return start + 1, nil
-	}
-
-	mid := int(start+end) / 2
-	w, err := pdf.MeasureTextWidth(string(runes[:mid]))
-	if err != nil {
-		return -1, err
-	}
-
-	if w > widthLimit {
-		return r.getSplitIndex(pdf, runes, start, mid, widthLimit)
-	} else {
-		return r.getSplitIndex(pdf, runes, mid, end, widthLimit)
-	}
-}
 func (r *noBrRun) draw(pdf *gopdf.GoPdf) error {
 	if err := pdf.SetFont(r.FontFamily, "", r.FontSize); err != nil {
 		return err
