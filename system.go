@@ -22,7 +22,7 @@ var (
 type FlexItem interface {
 	// draw はこのFlexItemを与えられた矩形内に描画します。
 	draw(pdf *gopdf.GoPdf, r rect) error
-	getPreferredSize(pdf *gopdf.GoPdf, width float64) (size, error)
+	getPreferredSize(pdf *gopdf.GoPdf, marginBoxMax size) (size, error)
 	getFlexGrow() float64
 }
 

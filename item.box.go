@@ -1,6 +1,7 @@
 package flexpdf
 
 import (
+	"log"
 	"math"
 
 	"github.com/signintech/gopdf"
@@ -59,13 +60,12 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 
 		// 1パス目は自然なサイズ
 		for i, item := range b.Items {
-			maxWidth := -1.0 // -1 -> 自然なサイズ
-			if mainAxis == vertical {
-				maxWidth = r.w
-			}
-			ps, err := item.getPreferredSize(pdf, maxWidth)
+			ps, err := item.getPreferredSize(pdf, size{w: r.w, h: r.h})
 			if err != nil {
 				return err
+			}
+			if ps.h > 600 {
+				log.Print("🍈", ps)
 			}
 			growTotal += item.getFlexGrow()
 			prefSizes[i] = ps
@@ -85,7 +85,7 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 
 		// log.Println(mainAxisRemains, growTotal, growing, spacing)
 
-		// 2パス目は幅を制限したときのサイズ
+		// 2パス目はグロー・シュリンクを考慮したサイズ
 		for i, item := range b.Items {
 			ps := prefSizes[i]
 
@@ -96,12 +96,16 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 				})
 			}
 
-			if mainAxis == horizontal {
-				ps2, err := item.getPreferredSize(pdf, ps.w) // 指定したサイズ
+			if mainAxis == horizontal { // TODO これ要る？
+				ps_, err := item.getPreferredSize(pdf, ps) // グロー・シュリンクしたサイズ
 				if err != nil {
 					return err
 				}
-				ps.h = ps2.h // 高さだけ更新
+				if ps_.h > 600 {
+					log.Println("🍈", ps_)
+				}
+				// TODO 幅も更新？
+				ps.h = ps_.h // 高さだけ更新
 			}
 
 			prefSizes[i] = ps
@@ -126,6 +130,9 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 
 	for i, item := range b.Items {
 		ps := prefSizes[i]
+		if ps.h > 600 {
+			log.Println("🍈🍈", ps)
+		}
 
 		itemRect.w = ps.w
 		itemRect.h = ps.h
@@ -158,20 +165,23 @@ func (b *Box) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 
 	return nil
 }
-func (b *Box) getContentSize(pdf *gopdf.GoPdf, _ float64) (size, error) {
+func (b *Box) getContentSize(pdf *gopdf.GoPdf, contentBoxMax size) (size, error) {
+	log.Println(contentBoxMax)
+
 	cs := size{}
 	for _, item := range b.Items {
-		ips, err := item.getPreferredSize(pdf, -1)
+		ips, err := item.getPreferredSize(pdf, contentBoxMax)
 		if err != nil {
 			return size{}, err
 		}
-		if b.Direction.mainAxis() == horizontal {
-			cs.w += ips.w
-			cs.h = math.Max(cs.h, ips.h)
-		} else {
-			cs.w = math.Max(cs.w, ips.w)
-			cs.h += ips.h
-		}
+
+		mainAxis := b.Direction.mainAxis()
+		counterAxis := !mainAxis
+
+		cs = cs.add(mainAxis, ips.get(mainAxis))
+		cs = cs.update(counterAxis, func(ov float64) float64 {
+			return math.Max(ov, ips.get(counterAxis))
+		})
 	}
 	return cs, nil
 }

@@ -107,23 +107,14 @@ var cases = map[string]*Box{
 		NewRowBox(
 			NewText(NewRun(text).SetFontSize(14)),
 		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
-		NewRowBox(
-			NewText(NewRun(text).SetFontSize(24)),
-		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
 		// 親がサイズ指定
 		NewRowBox(
 			NewText(NewRun(text).SetFontSize(14)),
 		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
-		NewRowBox(
-			NewText(NewRun(text).SetFontSize(24)),
-		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
 		// 自身がサイズ指定
 		NewRowBox(
 			NewText(NewRun(text).SetFontSize(14)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
-		),
-		NewRowBox(
-			NewText(NewRun(text).SetFontSize(24)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
-		),
+		).SetMargin(0, 0, 0, 80),
 		NewRowBox(
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xCC, G: 0xCC, B: 0xCC, A: 0xFF}),
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(color.RGBA{R: 0xFF, G: 0xCC, B: 0xCC, A: 0xFF}).SetMargin(5),

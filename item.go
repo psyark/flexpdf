@@ -2,19 +2,24 @@ package flexpdf
 
 import (
 	"image/color"
-	"math"
+	"log"
 
 	"github.com/signintech/gopdf"
 )
 
-// TODO 良い名前
-type flexItemExtender interface {
+var (
+	_ flexItemContent = &Box{}
+	_ flexItemContent = &Text{}
+)
+
+// flexItemContent は
+type flexItemContent interface {
 	FlexItem
 	drawContent(*gopdf.GoPdf, rect) error
-	getContentSize(pdf *gopdf.GoPdf, width float64) (size, error)
+	getContentSize(pdf *gopdf.GoPdf, contentBoxMax size) (size, error)
 }
 
-type flexItemCommon[T flexItemExtender] struct {
+type flexItemCommon[T flexItemContent] struct {
 	self            T
 	Width           float64
 	Height          float64
@@ -135,8 +140,10 @@ func (c *flexItemCommon[T]) draw(pdf *gopdf.GoPdf, marginBox rect) (err error) {
 	}
 	return nil
 }
-func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf, maxWidth float64) (size, error) {
-	ps, err := c.self.getContentSize(pdf, math.Min(maxWidth, c.Width-c.Margin.w()-c.Padding.w()-c.Border.Width.w()))
+func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf, marginBoxMax size) (size, error) {
+	contentBoxMax := marginBoxMax.shrink(c.Margin).shrink(c.Border.Width).shrink(c.Padding)
+
+	ps, err := c.self.getContentSize(pdf, contentBoxMax)
 	if err != nil {
 		return size{}, err
 	}
@@ -151,7 +158,11 @@ func (c *flexItemCommon[T]) getPreferredSize(pdf *gopdf.GoPdf, maxWidth float64)
 	}
 
 	for _, space := range []Spacing{c.Margin, c.Border.Width, c.Padding} {
-		ps = ps.add(space)
+		ps = ps.expand(space)
+	}
+
+	if ps.h > 600 {
+		log.Println("🍣", ps)
 	}
 
 	return ps, nil

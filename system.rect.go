@@ -2,6 +2,7 @@ package flexpdf
 
 // rect はページ中の矩形を表します
 type rect struct {
+	// TODO sizeを使う
 	x, y, w, h float64
 }
 

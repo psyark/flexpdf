@@ -2,6 +2,7 @@ package flexpdf
 
 import (
 	"image/color"
+	"log"
 	"math"
 	"strings"
 
@@ -196,10 +197,10 @@ func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 	return nil
 }
 
-func (t *Text) getContentSize(pdf *gopdf.GoPdf, maxWidth float64) (s size, err error) {
+func (t *Text) getContentSize(pdf *gopdf.GoPdf, contentBoxMax size) (s size, err error) {
 	defer wrap(&err, "text.getContentSize")
 
-	lines, err := t.splitLines(pdf, maxWidth)
+	lines, err := t.splitLines(pdf, contentBoxMax.w)
 	if err != nil {
 		return size{}, err
 	}
@@ -208,6 +209,11 @@ func (t *Text) getContentSize(pdf *gopdf.GoPdf, maxWidth float64) (s size, err e
 		s.w = math.Max(s.w, line.size.w)
 		s.h += line.size.h
 	}
+
+	if strings.HasPrefix(t.Runs[0].Text, "Lorem ipsum") {
+		log.Println(s, contentBoxMax.w)
+	}
+
 	return s, nil
 }
 
