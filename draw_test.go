@@ -94,10 +94,15 @@ var (
 var cases = map[string]*Box{
 	"text": NewColumnBox(
 		NewColumnBox(
-			NewText(NewRun("begin")).SetAlign(TextAlignBegin),
-			NewText(NewRun("center")).SetAlign(TextAlignCenter),
-			NewText(NewRun("end")).SetAlign(TextAlignEnd),
-		).SetBorder(UniformedBorder(colorR, BorderStyleDotted, 2)).SetWidth(300),
+			NewText(NewRun(text)).SetBorder(UniformedBorder(colorR, BorderStyleDotted, 2)).SetAlign(TextAlignBegin),
+			NewText(NewRun(text)).SetBorder(UniformedBorder(colorR, BorderStyleDotted, 2)).SetAlign(TextAlignCenter),
+			NewText(NewRun(text)).SetBorder(UniformedBorder(colorR, BorderStyleDotted, 2)).SetAlign(TextAlignEnd),
+		),
+		NewRowBox( // TODO shrink
+			NewText(NewRun(text)).SetBorder(UniformedBorder(colorR, BorderStyleDotted, 2)).SetAlign(TextAlignBegin),
+			NewText(NewRun(text)).SetBorder(UniformedBorder(colorR, BorderStyleDotted, 2)).SetAlign(TextAlignCenter),
+			NewText(NewRun(text)).SetBorder(UniformedBorder(colorR, BorderStyleDotted, 2)).SetAlign(TextAlignEnd),
+		),
 		// 1 run for 1 text
 		NewRowBox(
 			NewText(NewRun("normal").SetFontSize(30)),
