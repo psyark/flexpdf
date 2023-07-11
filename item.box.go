@@ -34,6 +34,10 @@ func NewBox(dir Direction, items ...FlexItem) *Box {
 	b.flexItemCommon.init(b)
 	return b
 }
+func (b *Box) Configure(conf func(*Box)) *Box {
+	conf(b)
+	return b
+}
 func (b *Box) SetJustifyContent(jc JustifyContent) *Box {
 	b.JustifyContent = jc
 	return b

@@ -111,17 +111,27 @@ var cases = map[string]*Box{
 		),
 		// text with break
 		// サイズ未指定
-		NewRowBox(
-			NewText(NewRun(text).SetFontSize(14)),
-		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)),
+		NewRowBox().Configure(func(b *Box) {
+			b.Border = UniformedBorder(color.Black, BorderStyleDotted, 1)
+			b.Items = []FlexItem{
+				NewText(NewRun(text).SetFontSize(14)),
+			}
+		}),
 		// 親がサイズ指定
-		NewRowBox(
-			NewText(NewRun(text).SetFontSize(14)),
-		).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
+		NewRowBox().Configure(func(b *Box) {
+			b.Border = UniformedBorder(color.Black, BorderStyleDotted, 1)
+			b.Width = 200
+			b.Items = []FlexItem{
+				NewText(NewRun(text).SetFontSize(14)),
+			}
+		}),
 		// 自身がサイズ指定
-		NewRowBox(
-			NewText(NewRun(text).SetFontSize(14)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
-		).SetMargin(0, 0, 0, 80),
+		NewRowBox().Configure(func(b *Box) {
+			b.Margin.Left = 80
+			b.Items = []FlexItem{
+				NewText(NewRun(text).SetFontSize(14)).SetBorder(UniformedBorder(color.Black, BorderStyleDotted, 1)).SetWidth(200),
+			}
+		}),
 		NewRowBox(
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(colorL),
 			NewText(NewRun("Text").SetFontSize(30)).SetBackgroundColor(colorR).SetMargin(5),

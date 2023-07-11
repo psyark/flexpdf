@@ -26,9 +26,9 @@ func (s rect) setSize(a axis, value float64) rect {
 }
 
 // updateSize は値を更新するためのコールバックを用いて指定した軸の値を更新し、新たなrectを返します
-func (s rect) updateSize(a axis, fn func(float64) float64) rect {
-	return s.setSize(a, fn(s.getSize(a)))
-}
+// func (s rect) updateSize(a axis, fn func(float64) float64) rect {
+// 	return s.setSize(a, fn(s.getSize(a)))
+// }
 
 // getPos は指定した軸の値を返します
 func (s rect) getPos(a axis) float64 {

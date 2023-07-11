@@ -49,12 +49,12 @@ type TRBL[T any] struct {
 
 type Spacing TRBL[float64]
 
-func (s Spacing) w() float64 {
-	return s.Right + s.Left
-}
-func (s Spacing) h() float64 {
-	return s.Top + s.Bottom
-}
+// func (s Spacing) w() float64 {
+// 	return s.Right + s.Left
+// }
+// func (s Spacing) h() float64 {
+// 	return s.Top + s.Bottom
+// }
 
 func wrap(errp *error, format string, args ...any) {
 	if *errp != nil {
