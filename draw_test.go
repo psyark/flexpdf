@@ -93,6 +93,11 @@ var (
 
 var cases = map[string]*Box{
 	"text": NewColumnBox(
+		NewColumnBox(
+			NewText(NewRun("begin")).SetAlign(TextAlignBegin),
+			NewText(NewRun("center")).SetAlign(TextAlignCenter),
+			NewText(NewRun("end")).SetAlign(TextAlignEnd),
+		).SetBorder(UniformedBorder(colorR, BorderStyleDotted, 2)).SetWidth(300),
 		// 1 run for 1 text
 		NewRowBox(
 			NewText(NewRun("normal").SetFontSize(30)),

@@ -166,7 +166,14 @@ func (t *Text) drawContent(pdf *gopdf.GoPdf, r rect) (err error) {
 
 	pdf.SetXY(r.x, r.y)
 	for _, line := range lines {
-		pdf.SetX(r.x) // TODO align
+		switch t.Align {
+		case TextAlignBegin:
+			pdf.SetX(r.x)
+		case TextAlignCenter:
+			pdf.SetX(r.x + (r.w-line.size.w)/2)
+		case TextAlignEnd:
+			pdf.SetX(r.x + r.w - line.size.w)
+		}
 		for _, nbr := range line.nbrs {
 			if err := nbr.draw(pdf); err != nil {
 				return err
@@ -203,10 +210,6 @@ func (t *Text) getContentSize(pdf *gopdf.GoPdf, contentBoxMax size) (s size, err
 // [ ]  - 連続する欧文文字と空白
 // [ ]  - 句読点や約物
 func (t *Text) splitLines(pdf *gopdf.GoPdf, widthLimit float64) ([]textLine, error) {
-	if false {
-		pdf.SplitText("", 10)
-	}
-
 	lines := []textLine{}
 	for _, r := range t.Runs {
 		for i, nbr := range r.splitWithNewline() {

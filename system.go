@@ -37,6 +37,7 @@ func setColor(pdf *gopdf.GoPdf, col color.Color) (err error) {
 	}
 
 	pdf.SetFillColor(uint8(r>>8), uint8(g>>8), uint8(b>>8))
+	pdf.SetStrokeColor(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 	return nil
 }
 
